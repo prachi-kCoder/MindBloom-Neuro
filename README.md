@@ -1,4 +1,5 @@
 # MINDBLOOM : Empower children with mental disorders and enable them to master their skills with their special abilities
+![image](https://github.com/user-attachments/assets/d5ddd93e-e30f-4eeb-9043-81f529cdfcee)
 
 ## Project info
 
