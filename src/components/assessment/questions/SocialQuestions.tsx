@@ -1,11 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
-import { Users } from 'lucide-react';
+import { Users, Video, Eye } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface SocialQuestionsProps {
   childAge: number;
@@ -15,6 +16,7 @@ interface SocialQuestionsProps {
 
 const SocialQuestions: React.FC<SocialQuestionsProps> = ({ childAge, initialResponses, onComplete }) => {
   const [responses, setResponses] = useState<Record<string, any>>(initialResponses || {});
+  const [isAllAnswered, setIsAllAnswered] = useState(false);
 
   const handleResponseChange = (questionId: string, value: any) => {
     setResponses(prev => ({
@@ -36,9 +38,17 @@ const SocialQuestions: React.FC<SocialQuestionsProps> = ({ childAge, initialResp
     'social_interest'
   ];
   
-  const allQuestionsAnswered = requiredQuestions.every(q => 
-    responses[q] !== undefined && responses[q] !== ''
-  );
+  // Add age-specific required questions
+  if (childAge >= 6) {
+    requiredQuestions.push('social_cues');
+  }
+
+  useEffect(() => {
+    const allAnswered = requiredQuestions.every(q => 
+      responses[q] !== undefined && responses[q] !== ''
+    );
+    setIsAllAnswered(allAnswered);
+  }, [responses]);
 
   return (
     <div className="space-y-6">
@@ -51,12 +61,31 @@ const SocialQuestions: React.FC<SocialQuestionsProps> = ({ childAge, initialResp
         These questions help us understand how your child communicates with others and 
         navigates social situations.
       </p>
+
+      {/* Video Analysis Option */}
+      <div className="border rounded-lg p-4 bg-primary/5 mb-6">
+        <div className="flex items-center gap-2">
+          <Video className="text-primary h-5 w-5" />
+          <h3 className="text-lg font-medium">Enhanced Video Analysis (Optional)</h3>
+        </div>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Our advanced AI can analyze social communication patterns through short video clips.
+          This helps measure gaze patterns, name response, and social engagement more accurately.
+        </p>
+        <div className="mt-4 flex items-center space-x-2">
+          <Checkbox id="enable-video" />
+          <Label htmlFor="enable-video">Enable video analysis for more accurate assessment</Label>
+        </div>
+      </div>
       
       {/* Eye contact question */}
       <div className="border rounded-lg p-4 bg-card/50">
-        <Label className="text-lg font-medium mb-3 block">
-          How well does your child maintain eye contact during conversations?
-        </Label>
+        <div className="flex items-center gap-2 mb-3">
+          <Eye className="text-primary h-5 w-5" />
+          <Label className="text-lg font-medium">
+            How well does your child maintain eye contact during conversations?
+          </Label>
+        </div>
         <div className="mt-6 mb-2">
           <Slider
             defaultValue={[responses.eye_contact || 3]}
@@ -172,6 +201,7 @@ const SocialQuestions: React.FC<SocialQuestionsProps> = ({ childAge, initialResp
         </div>
       </div>
       
+      {/* Age-specific questions */}
       {childAge >= 6 && (
         <div className="border rounded-lg p-4 bg-card/50">
           <fieldset>
@@ -204,16 +234,47 @@ const SocialQuestions: React.FC<SocialQuestionsProps> = ({ childAge, initialResp
         </div>
       )}
       
+      {/* DSM-5 Aligned Question */}
+      <div className="border rounded-lg p-4 bg-card/50">
+        <fieldset>
+          <legend className="text-lg font-medium mb-3">
+            How often does your child initiate shared play with others?
+          </legend>
+          <RadioGroup 
+            value={responses.shared_play_initiation || ''} 
+            onValueChange={(value) => handleResponseChange('shared_play_initiation', value)}
+            className="space-y-2"
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="frequently" id="play-frequently" />
+              <Label htmlFor="play-frequently">Frequently (multiple times a day)</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="occasionally" id="play-occasionally" />
+              <Label htmlFor="play-occasionally">Occasionally (a few times a week)</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="rarely" id="play-rarely" />
+              <Label htmlFor="play-rarely">Rarely (once a week or less)</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="never" id="play-never" />
+              <Label htmlFor="play-never">Never initiates shared play</Label>
+            </div>
+          </RadioGroup>
+        </fieldset>
+      </div>
+      
       <div className="flex justify-end pt-4">
         <Button 
           onClick={handleSubmit} 
-          disabled={!allQuestionsAnswered}
+          disabled={!isAllAnswered}
         >
           Next: Cognitive Processing
         </Button>
       </div>
       
-      {!allQuestionsAnswered && (
+      {!isAllAnswered && (
         <p className="text-sm text-amber-500">
           Please answer all required questions before proceeding.
         </p>

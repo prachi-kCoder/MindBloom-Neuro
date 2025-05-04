@@ -1,9 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
+import { ArrowLeft } from 'lucide-react';
 import BehavioralQuestions from './questions/BehavioralQuestions';
 import SocialQuestions from './questions/SocialQuestions';
 import CognitiveQuestions from './questions/CognitiveQuestions';
@@ -26,6 +27,14 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({ childAge, onComplete })
     cognitive: {},
     adaptive: {}
   });
+  
+  // Track domain completion status
+  const [domainStatus, setDomainStatus] = useState({
+    behavioral: false,
+    social: false,
+    cognitive: false,
+    adaptive: false
+  });
 
   const updateResponses = (domain: Domain, questionResponses: Record<string, any>) => {
     setResponses(prev => ({
@@ -34,6 +43,12 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({ childAge, onComplete })
         ...prev[domain],
         ...questionResponses
       }
+    }));
+    
+    // Mark the domain as completed
+    setDomainStatus(prev => ({
+      ...prev,
+      [domain]: true
     }));
   };
 
@@ -66,9 +81,35 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({ childAge, onComplete })
     }
   };
 
+  // Handle manual tab changes
+  const handleTabChange = (value: string) => {
+    // Only allow navigation to completed domains or the current one
+    const selectedDomain = value as Domain;
+    const domains: Domain[] = ['behavioral', 'social', 'cognitive', 'adaptive'];
+    const currentIndex = domains.indexOf(currentDomain);
+    const selectedIndex = domains.indexOf(selectedDomain);
+    
+    // Allow going back to completed domains or staying on current
+    if (domainStatus[selectedDomain] || selectedIndex <= currentIndex) {
+      setCurrentDomain(selectedDomain);
+    } else {
+      toast({
+        title: "Complete Current Section",
+        description: `Please complete the ${capitalizeFirstLetter(currentDomain)} section before proceeding.`,
+        variant: "destructive"
+      });
+    }
+  };
+
   const capitalizeFirstLetter = (string: string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
   };
+
+  // Update allowed tabs when domain status changes
+  useEffect(() => {
+    const completedCount = Object.values(domainStatus).filter(Boolean).length;
+    setProgress((completedCount / 4) * 100);
+  }, [domainStatus]);
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -88,19 +129,23 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({ childAge, onComplete })
       </div>
       
       <Card className="mb-6">
-        <Tabs value={currentDomain} onValueChange={(value) => setCurrentDomain(value as Domain)} className="w-full">
+        <Tabs value={currentDomain} onValueChange={handleTabChange} className="w-full">
           <TabsList className="grid grid-cols-2 md:grid-cols-4 mb-4">
-            <TabsTrigger value="behavioral" disabled={currentDomain !== 'behavioral' && progress < 25}>
+            <TabsTrigger value="behavioral">
               Behavioral
+              {domainStatus.behavioral && <span className="ml-1 text-green-500">✓</span>}
             </TabsTrigger>
-            <TabsTrigger value="social" disabled={currentDomain !== 'social' && progress < 25}>
+            <TabsTrigger value="social" disabled={!domainStatus.behavioral && currentDomain !== 'social'}>
               Social
+              {domainStatus.social && <span className="ml-1 text-green-500">✓</span>}
             </TabsTrigger>
-            <TabsTrigger value="cognitive" disabled={currentDomain !== 'cognitive' && progress < 50}>
+            <TabsTrigger value="cognitive" disabled={!domainStatus.social && currentDomain !== 'cognitive'}>
               Cognitive
+              {domainStatus.cognitive && <span className="ml-1 text-green-500">✓</span>}
             </TabsTrigger>
-            <TabsTrigger value="adaptive" disabled={currentDomain !== 'adaptive' && progress < 75}>
+            <TabsTrigger value="adaptive" disabled={!domainStatus.cognitive && currentDomain !== 'adaptive'}>
               Adaptive
+              {domainStatus.adaptive && <span className="ml-1 text-green-500">✓</span>}
             </TabsTrigger>
           </TabsList>
           
@@ -138,8 +183,25 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({ childAge, onComplete })
         </Tabs>
       </Card>
       
-      <div className="text-sm text-muted-foreground">
-        <p>You can save your progress and return later. All information is stored securely.</p>
+      <div className="text-sm text-muted-foreground flex items-center justify-between">
+        <div>
+          <p>You can save your progress and return later. All information is stored securely.</p>
+        </div>
+        {currentDomain !== 'behavioral' && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex items-center gap-1"
+            onClick={() => {
+              const domains: Domain[] = ['behavioral', 'social', 'cognitive', 'adaptive'];
+              const currentIndex = domains.indexOf(currentDomain);
+              const prevDomain = domains[currentIndex - 1];
+              setCurrentDomain(prevDomain);
+            }}
+          >
+            <ArrowLeft className="h-3 w-3" /> Previous Section
+          </Button>
+        )}
       </div>
     </div>
   );
