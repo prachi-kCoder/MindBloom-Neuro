@@ -26,7 +26,7 @@ const steps = [
 
 const HowItWorks = () => {
   return (
-    <section className="py-12 md:py-24 lg:py-32">
+    <section className="py-12 md:py-24 lg:py-32 relative z-0">
       <div className="container px-4 md:px-6">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
           <div className="space-y-2">
@@ -47,7 +47,7 @@ const HowItWorks = () => {
           <div className="space-y-16 md:space-y-0 relative">
             {steps.map((step, index) => (
               <div key={index} className={`md:grid md:grid-cols-2 md:gap-8 md:items-center relative ${index % 2 === 0 ? '' : 'md:flex-row-reverse'} ${index !== steps.length - 1 ? 'pb-16' : ''}`}>
-                <div className={`flex items-center gap-4 ${index % 2 === 0 ? 'md:text-right md:justify-end' : 'md:text-left'} z-10`}>
+                <div className={`flex items-center gap-4 ${index % 2 === 0 ? 'md:text-right md:justify-end' : 'md:text-left'} z-0`}>
                   <div className={`${index % 2 === 0 ? 'md:order-2' : 'md:order-1'} flex`}>
                     <div className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold bg-gradient-to-r from-primary/20 to-primary/40 text-primary ${index % 2 === 0 ? 'md:ml-4' : 'md:mr-4'}`}>
                       {step.number}
@@ -59,7 +59,7 @@ const HowItWorks = () => {
                   </div>
                 </div>
                 
-                <div className={`mt-6 md:mt-0 ${index % 2 === 0 ? 'md:pr-8' : 'md:pl-8'} z-10`}>
+                <div className={`mt-6 md:mt-0 ${index % 2 === 0 ? 'md:pr-8' : 'md:pl-8'} z-0`}>
                   <div className={`bg-soft-blue/20 backdrop-blur-sm rounded-xl p-6 h-40 flex items-center justify-center ${index % 2 === 0 ? '' : ''}`}>
                     <div className="text-center">
                       <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center bg-white shadow-sm`}>
