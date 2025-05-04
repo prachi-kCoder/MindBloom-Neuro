@@ -1,4 +1,4 @@
-# Welcome to your Lovable project
+# MINDBLOOM : Empower children with mental disorders and enable them to master their skills with their special abilities
 
 ## Project info
 
