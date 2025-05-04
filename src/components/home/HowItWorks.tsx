@@ -5,17 +5,17 @@ const steps = [
   {
     number: '01',
     title: 'Complete the Assessment',
-    description: 'Answer age-appropriate questions about your child's behavior, interests, and challenges.'
+    description: "Answer age-appropriate questions about your child's behavior, interests, and challenges."
   },
   {
     number: '02',
     title: 'Review Your Insights',
-    description: 'Receive personalized analysis of your child's behavioral patterns and developmental indicators.'
+    description: "Receive personalized analysis of your child's behavioral patterns and developmental indicators."
   },
   {
     number: '03',
     title: 'Explore Resources',
-    description: 'Access tailored educational materials and strategies based on your child's specific needs.'
+    description: "Access tailored educational materials and strategies based on your child's specific needs."
   },
   {
     number: '04',
