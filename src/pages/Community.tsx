@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MessageCircle, Users, Heart, Calendar, Star, MessageSquare, HandShake } from 'lucide-react';
+import { MessageCircle, Users, Heart, Calendar, Star, MessageSquare, Handshake } from 'lucide-react';
 
 const Community = () => {
   return (
