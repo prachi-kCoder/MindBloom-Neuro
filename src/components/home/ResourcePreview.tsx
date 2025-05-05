@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Book, Brain, Child, Parent } from 'lucide-react';
+import { Book, Brain, User, Users } from 'lucide-react';
 
 const disorderTypes = [
   { id: 'adhd', name: 'ADHD' },
@@ -96,7 +96,7 @@ const ResourcePreview = () => {
           <div className="flex justify-center items-center gap-6 mb-8">
             <Card className="overflow-hidden border-border shadow-sm hover:shadow-md transition-shadow flex-1 max-w-xs">
               <div className="bg-primary/5 p-6 flex justify-center">
-                <Parent className="h-16 w-16 text-primary" />
+                <Users className="h-16 w-16 text-primary" />
               </div>
               <CardContent className="p-5 text-center">
                 <h3 className="text-lg font-semibold mb-2">For Parents & Teachers</h3>
@@ -113,7 +113,7 @@ const ResourcePreview = () => {
             
             <Card className="overflow-hidden border-border shadow-sm hover:shadow-md transition-shadow flex-1 max-w-xs">
               <div className="bg-primary/5 p-6 flex justify-center">
-                <Child className="h-16 w-16 text-primary" />
+                <User className="h-16 w-16 text-primary" />
               </div>
               <CardContent className="p-5 text-center">
                 <h3 className="text-lg font-semibold mb-2">For Children</h3>

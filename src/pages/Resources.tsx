@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Book, Brain, Child, Parent, ArrowLeft } from 'lucide-react';
+import { Book, Brain, User, Users, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 // Disorder resource components
@@ -33,7 +33,7 @@ const Resources = () => {
                 className="flex items-center gap-2"
                 onClick={() => setAudience('parent')}
               >
-                <Parent className="h-4 w-4" />
+                <Users className="h-4 w-4" />
                 For Parents & Teachers
               </Button>
               <Button
@@ -41,7 +41,7 @@ const Resources = () => {
                 className="flex items-center gap-2"
                 onClick={() => setAudience('child')}
               >
-                <Child className="h-4 w-4" />
+                <User className="h-4 w-4" />
                 For Children
               </Button>
             </div>
