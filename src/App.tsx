@@ -5,7 +5,7 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import "./App.css";
 import Index from "@/pages/Index";
 import About from "@/pages/About";
-import Dashboard from "@/pages/Dashboard";
+import Appointments from "@/pages/Appointments";
 import Assessment from "@/pages/Assessment";
 import Resources from "@/pages/Resources";
 import SuccessStories from "@/pages/SuccessStories";
@@ -25,7 +25,7 @@ function App() {
     <Routes>
       <Route path="/" element={<Index />} />
       <Route path="/about" element={<About />} />
-      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/appointments" element={<Appointments />} />
       <Route path="/assessment" element={<Assessment />} />
       <Route path="/resources" element={<Resources />} />
       <Route path="/resources/success-stories" element={<SuccessStories />} />

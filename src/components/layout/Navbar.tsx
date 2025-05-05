@@ -22,8 +22,8 @@ const Navbar = () => {
           <Link to="/assessment" className="text-sm font-medium hover:text-primary transition-colors">
             Assessment
           </Link>
-          <Link to="/dashboard" className="text-sm font-medium hover:text-primary transition-colors">
-            Insights
+          <Link to="/appointments" className="text-sm font-medium hover:text-primary transition-colors">
+            Appointments
           </Link>
           <Link to="/community" className="text-sm font-medium hover:text-primary transition-colors">
             Community
