@@ -1,4 +1,3 @@
-
 import React from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
@@ -105,7 +104,7 @@ const Community = () => {
             
             <div className="flex flex-col items-center text-center">
               <div className="bg-background rounded-full p-3 mb-4">
-                <HandShake className="h-6 w-6 text-primary" />
+                <Handshake className="h-6 w-6 text-primary" />
               </div>
               <h3 className="font-medium mb-2">Collaborative Approach</h3>
               <p className="text-sm text-muted-foreground">
