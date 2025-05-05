@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Book, Brain, Child, Parent } from 'lucide-react';
 
 const disorderTypes = [
   { id: 'adhd', name: 'ADHD' },
@@ -91,11 +92,51 @@ const ResourcePreview = () => {
         </div>
         
         <div className="mt-12 mx-auto max-w-4xl">
+          {/* Audience preview */}
+          <div className="flex justify-center items-center gap-6 mb-8">
+            <Card className="overflow-hidden border-border shadow-sm hover:shadow-md transition-shadow flex-1 max-w-xs">
+              <div className="bg-primary/5 p-6 flex justify-center">
+                <Parent className="h-16 w-16 text-primary" />
+              </div>
+              <CardContent className="p-5 text-center">
+                <h3 className="text-lg font-semibold mb-2">For Parents & Teachers</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Evidence-based guidance, practical strategies and management approaches
+                </p>
+                <Button variant="outline" className="rounded-full" asChild>
+                  <Link to="/resources">
+                    View Parent Resources
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+            
+            <Card className="overflow-hidden border-border shadow-sm hover:shadow-md transition-shadow flex-1 max-w-xs">
+              <div className="bg-primary/5 p-6 flex justify-center">
+                <Child className="h-16 w-16 text-primary" />
+              </div>
+              <CardContent className="p-5 text-center">
+                <h3 className="text-lg font-semibold mb-2">For Children</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Kid-friendly explanations, learning tools, and activities to build confidence
+                </p>
+                <Button variant="outline" className="rounded-full" asChild>
+                  <Link to="/resources">
+                    View Child Resources
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+          
           <Tabs defaultValue="adhd" className="w-full">
             <div className="flex justify-center mb-6">
               <TabsList className="bg-muted/50">
                 {disorderTypes.map(type => (
                   <TabsTrigger key={type.id} value={type.id} className="px-6">
+                    {type.id === 'adhd' && <Brain className="h-4 w-4 mr-2" />}
+                    {type.id === 'asd' && <Brain className="h-4 w-4 mr-2" />}
+                    {type.id === 'dyslexia' && <Book className="h-4 w-4 mr-2" />}
                     {type.name}
                   </TabsTrigger>
                 ))}
@@ -126,8 +167,8 @@ const ResourcePreview = () => {
                 </div>
                 <div className="flex justify-center mt-8">
                   <Button variant="outline" className="rounded-full" asChild>
-                    <Link to={`/resources/${type}`}>
-                      View all {disorderTypes.find(d => d.id === type)?.name} resources
+                    <Link to="/resources">
+                      Explore all resources
                     </Link>
                   </Button>
                 </div>
