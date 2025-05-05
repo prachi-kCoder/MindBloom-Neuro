@@ -1,21 +1,25 @@
 
 import React, { useState } from 'react';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Info, Menu, X } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Info, Menu, User, X } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useAuth } from '@/contexts/AuthContext';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
   
   return (
     <header className="border-b bg-white/80 backdrop-blur-md sticky top-0 z-50">
       <div className="container flex items-center justify-between h-16 px-4 md:px-6">
         <Link to="/" className="flex items-center gap-2">
           <div className="relative w-8 h-8 overflow-hidden rounded-full bg-soft-purple flex items-center justify-center">
-            <span className="text-primary font-bold text-xl">FL</span>
+            <span className="text-primary font-bold text-xl">MB</span>
           </div>
-          <span className="font-semibold tracking-tight text-lg">Feed Lovable</span>
+          <span className="font-semibold tracking-tight text-lg">MindBloom</span>
         </Link>
         
         <nav className="hidden md:flex items-center gap-6">
@@ -40,11 +44,25 @@ const Navbar = () => {
               <span className="sr-only">About</span>
             </Link>
           </Button>
-          <Button className="rounded-full bg-primary hover:bg-primary/90" asChild>
-            <Link to="/login">
-              Sign In
-            </Link>
-          </Button>
+          
+          {isAuthenticated ? (
+            <Button 
+              variant="ghost" 
+              className="rounded-full p-0 h-10 w-10 overflow-hidden" 
+              onClick={() => navigate('/profile')}
+            >
+              <Avatar>
+                <AvatarImage src={user?.avatar} alt={user?.name} />
+                <AvatarFallback>{user?.name?.charAt(0)}</AvatarFallback>
+              </Avatar>
+            </Button>
+          ) : (
+            <Button className="rounded-full bg-primary hover:bg-primary/90" asChild>
+              <Link to="/login">
+                Sign In
+              </Link>
+            </Button>
+          )}
           
           {/* Mobile Menu */}
           <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
@@ -59,14 +77,29 @@ const Navbar = () => {
                 <div className="flex items-center justify-between border-b pb-4">
                   <Link to="/" className="flex items-center gap-2" onClick={() => setIsMenuOpen(false)}>
                     <div className="relative w-8 h-8 overflow-hidden rounded-full bg-soft-purple flex items-center justify-center">
-                      <span className="text-primary font-bold text-xl">FL</span>
+                      <span className="text-primary font-bold text-xl">MB</span>
                     </div>
-                    <span className="font-semibold">Feed Lovable</span>
+                    <span className="font-semibold">MindBloom</span>
                   </Link>
                   <Button variant="ghost" size="icon" onClick={() => setIsMenuOpen(false)}>
                     <X className="h-5 w-5" />
                   </Button>
                 </div>
+                
+                {isAuthenticated && (
+                  <div className="py-4 border-b">
+                    <div className="flex items-center gap-3 px-2">
+                      <Avatar>
+                        <AvatarImage src={user?.avatar} alt={user?.name} />
+                        <AvatarFallback>{user?.name?.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium">{user?.name}</p>
+                        <p className="text-sm text-muted-foreground">{user?.email}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 
                 <nav className="flex flex-col gap-4 py-6">
                   <Link 
@@ -107,9 +140,30 @@ const Navbar = () => {
                 </nav>
                 
                 <div className="mt-auto border-t pt-4">
-                  <Button className="w-full" asChild onClick={() => setIsMenuOpen(false)}>
-                    <Link to="/login">Sign In</Link>
-                  </Button>
+                  {isAuthenticated ? (
+                    <div className="space-y-2">
+                      <Button className="w-full" asChild onClick={() => {
+                        setIsMenuOpen(false);
+                        navigate('/profile');
+                      }}>
+                        <Link to="/profile">
+                          <User className="h-4 w-4 mr-2" />
+                          Profile
+                        </Link>
+                      </Button>
+                      <Button variant="outline" className="w-full" onClick={() => {
+                        logout();
+                        setIsMenuOpen(false);
+                        navigate('/login');
+                      }}>
+                        Sign Out
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button className="w-full" asChild onClick={() => setIsMenuOpen(false)}>
+                      <Link to="/login">Sign In</Link>
+                    </Button>
+                  )}
                 </div>
               </div>
             </SheetContent>

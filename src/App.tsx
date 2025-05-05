@@ -12,6 +12,7 @@ import SuccessStories from "@/pages/SuccessStories";
 import Community from "@/pages/Community";
 import Contact from "@/pages/Contact";
 import Login from "@/pages/Login";
+import Profile from "@/pages/Profile";
 import NotFound from "@/pages/NotFound";
 
 function App() {
@@ -32,6 +33,7 @@ function App() {
       <Route path="/community" element={<Community />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/profile" element={<Profile />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

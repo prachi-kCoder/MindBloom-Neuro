@@ -10,9 +10,9 @@ const Footer = () => {
           <div>
             <Link to="/" className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-soft-purple flex items-center justify-center">
-                <span className="text-primary font-bold text-xl">FL</span>
+                <span className="text-primary font-bold text-xl">MB</span>
               </div>
-              <span className="font-semibold tracking-tight">Feed Lovable</span>
+              <span className="font-semibold tracking-tight">MindBloom</span>
             </Link>
             <p className="mt-2 text-sm text-muted-foreground max-w-xs">
               Supporting parents and children navigating neurodevelopmental disorders with compassion and technology.
@@ -95,7 +95,7 @@ const Footer = () => {
         
         <div className="border-t mt-8 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} Feed Lovable. All rights reserved.
+            © {new Date().getFullYear()} MindBloom. All rights reserved.
           </p>
           <div className="flex items-center gap-4">
             <Link to="#" className="text-muted-foreground hover:text-foreground transition-colors">
