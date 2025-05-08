@@ -6,6 +6,7 @@ import "./App.css";
 import Index from "@/pages/Index";
 import About from "@/pages/About";
 import Appointments from "@/pages/Appointments";
+import AppointmentBooking from "@/pages/AppointmentBooking";
 import Assessment from "@/pages/Assessment";
 import Resources from "@/pages/Resources";
 import SuccessStories from "@/pages/SuccessStories";
@@ -27,6 +28,7 @@ function App() {
       <Route path="/" element={<Index />} />
       <Route path="/about" element={<About />} />
       <Route path="/appointments" element={<Appointments />} />
+      <Route path="/appointments/book/:professionalId" element={<AppointmentBooking />} />
       <Route path="/assessment" element={<Assessment />} />
       <Route path="/resources" element={<Resources />} />
       <Route path="/resources/success-stories" element={<SuccessStories />} />
