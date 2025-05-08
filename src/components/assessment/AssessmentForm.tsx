@@ -13,12 +13,13 @@ import { toast } from "@/components/ui/use-toast";
 
 interface AssessmentFormProps {
   childAge: number;
+  assessmentType: 'video' | 'quiz';
   onComplete: (responses: Record<string, any>) => void;
 }
 
 type Domain = 'behavioral' | 'social' | 'cognitive' | 'adaptive';
 
-const AssessmentForm: React.FC<AssessmentFormProps> = ({ childAge, onComplete }) => {
+const AssessmentForm: React.FC<AssessmentFormProps> = ({ childAge, assessmentType, onComplete }) => {
   const [currentDomain, setCurrentDomain] = useState<Domain>('behavioral');
   const [progress, setProgress] = useState(0);
   const [responses, setResponses] = useState<Record<string, any>>({
@@ -114,9 +115,13 @@ const AssessmentForm: React.FC<AssessmentFormProps> = ({ childAge, onComplete })
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Child Assessment</h1>
+        <h1 className="text-3xl font-bold mb-2">
+          {assessmentType === 'video' ? 'Follow-Up Assessment' : 'Child Assessment Questionnaire'}
+        </h1>
         <p className="text-muted-foreground mb-4">
-          Please answer the following questions about your child's behaviors and abilities.
+          {assessmentType === 'video' 
+            ? "Please complete the following questions to complement the video analysis." 
+            : "Please answer the following questions about your child's behaviors and abilities."}
           The assessment is tailored for a {childAge}-year-old child.
         </p>
         <div className="space-y-2">

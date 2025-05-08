@@ -5,8 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { Video, Eye, Users, Brain } from 'lucide-react';
+import { Video, Eye, Users, Brain, Check } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
+import { Progress } from "@/components/ui/progress";
 
 interface VideoAnalysisProps {
   childAge: number;
@@ -67,6 +68,10 @@ const VideoAnalysis: React.FC<VideoAnalysisProps> = ({ childAge, onComplete, onS
     }
   };
   
+  // Calculate overall progress
+  const completedCount = Object.values(videoCompleted).filter(Boolean).length;
+  const progress = (completedCount / 3) * 100;
+  
   // Social stimulus content
   const renderSocialTest = () => (
     <div className="space-y-6">
@@ -103,7 +108,12 @@ const VideoAnalysis: React.FC<VideoAnalysisProps> = ({ childAge, onComplete, onS
       </div>
       
       {videoCompleted.social && (
-        <div className="space-y-4">
+        <div className="space-y-4 p-4 bg-muted/20 rounded-lg">
+          <div className="mb-4 flex items-center gap-2 text-primary">
+            <Check className="h-5 w-5" />
+            <span className="font-medium">Video Analysis Complete</span>
+          </div>
+          
           <div>
             <Label className="mb-2 block">
               How interested was your child in the faces shown in the video?
@@ -183,7 +193,12 @@ const VideoAnalysis: React.FC<VideoAnalysisProps> = ({ childAge, onComplete, onS
       </div>
       
       {videoCompleted.attention && (
-        <div className="space-y-4">
+        <div className="space-y-4 p-4 bg-muted/20 rounded-lg">
+          <div className="mb-4 flex items-center gap-2 text-primary">
+            <Check className="h-5 w-5" />
+            <span className="font-medium">Video Analysis Complete</span>
+          </div>
+          
           <div>
             <Label className="mb-2 block">
               How many times did your child get distracted during the video?
@@ -267,7 +282,12 @@ const VideoAnalysis: React.FC<VideoAnalysisProps> = ({ childAge, onComplete, onS
       </div>
       
       {videoCompleted.perception && (
-        <div className="space-y-4">
+        <div className="space-y-4 p-4 bg-muted/20 rounded-lg">
+          <div className="mb-4 flex items-center gap-2 text-primary">
+            <Check className="h-5 w-5" />
+            <span className="font-medium">Video Analysis Complete</span>
+          </div>
+          
           <div>
             <Label className="mb-2 block">
               How did your child react to the changing sounds in the video?
@@ -324,13 +344,19 @@ const VideoAnalysis: React.FC<VideoAnalysisProps> = ({ childAge, onComplete, onS
     </div>
   );
   
-  const completedCount = Object.values(videoCompleted).filter(Boolean).length;
-  
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2 mb-4">
         <Video className="text-primary h-6 w-6" />
         <h2 className="text-2xl font-bold">Interactive Video Analysis</h2>
+      </div>
+      
+      <div className="space-y-2">
+        <div className="flex justify-between text-sm text-muted-foreground">
+          <span>Assessment Progress</span>
+          <span>{completedCount} of 3 tests completed</span>
+        </div>
+        <Progress value={progress} className="h-2" />
       </div>
       
       <Card className="mb-6">
@@ -396,8 +422,16 @@ const VideoAnalysis: React.FC<VideoAnalysisProps> = ({ childAge, onComplete, onS
         <Button 
           onClick={handleComplete}
           disabled={completedCount === 0}
+          className="gap-2"
         >
-          {completedCount > 0 ? `Continue with ${completedCount} Completed Test${completedCount > 1 ? 's' : ''}` : 'Complete at least one test'}
+          {completedCount > 0 ? (
+            <>
+              Continue with {completedCount} Completed Test{completedCount > 1 ? 's' : ''}
+              <ArrowRight className="h-4 w-4" />
+            </>
+          ) : (
+            'Complete at least one test'
+          )}
         </Button>
       </div>
     </div>
@@ -405,3 +439,6 @@ const VideoAnalysis: React.FC<VideoAnalysisProps> = ({ childAge, onComplete, onS
 };
 
 export default VideoAnalysis;
+
+// Missing component import
+import { ArrowRight } from 'lucide-react';
