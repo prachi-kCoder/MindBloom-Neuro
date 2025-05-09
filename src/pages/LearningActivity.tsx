@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, Star } from 'lucide-react';
+import { ArrowLeft, Star, Grid3X3 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 
@@ -14,6 +13,16 @@ import AlphabetLearning from '@/components/learning/AlphabetLearning';
 import ColoringActivity from '@/components/learning/ColoringActivity';
 import FlashcardActivity from '@/components/learning/FlashcardActivity';
 import FullScreenToggle from '@/components/learning/FullScreenToggle';
+
+// Define extended interface for all possible props in components
+interface ExtendedActivityProps {
+  onProgress: (newProgress: number) => void;
+  currentStep: number;
+  setCurrentStep: React.Dispatch<React.SetStateAction<number>>;
+  ageGroup: string;
+  disabilityType?: string;
+  activityType?: string;
+}
 
 const LearningActivity = () => {
   const { ageGroup, activityId } = useParams<{ ageGroup: string, activityId: string }>();
@@ -46,7 +55,6 @@ const LearningActivity = () => {
           currentStep={currentStep} 
           setCurrentStep={setCurrentStep}
           ageGroup={ageGroup}
-          disabilityType={disabilityType}
         />;
       }
     }
@@ -58,7 +66,6 @@ const LearningActivity = () => {
       setCurrentStep={setCurrentStep}
       ageGroup={ageGroup || '0-3'} 
       activityType={activityId || 'general'}
-      disabilityType={disabilityType}
     />;
   };
 
@@ -88,6 +95,20 @@ const LearningActivity = () => {
       setCurrentStep(currentStep - 1);
       setProgress((currentStep / (totalSteps - 1)) * 100);
     }
+  };
+
+  const handleFullscreenChange = (fullscreenState: boolean) => {
+    setIsFullscreen(fullscreenState);
+  };
+
+  const goToMoreActivities = () => {
+    navigate('/learning', { 
+      state: { 
+        disabilityType,
+        ageGroup,
+        showIntro: false 
+      } 
+    });
   };
 
   // Activity details based on disability type
@@ -241,7 +262,7 @@ const LearningActivity = () => {
           <Button 
             variant="ghost" 
             className="mb-6 pl-0" 
-            onClick={() => navigate('/learning')}
+            onClick={goToMoreActivities}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Learning Center
@@ -274,7 +295,10 @@ const LearningActivity = () => {
                     )}
                   </div>
                   <div className="flex items-center gap-2">
-                    <FullScreenToggle containerId="learning-content" />
+                    <FullScreenToggle 
+                      containerId="learning-content"
+                      onFullscreenChange={handleFullscreenChange} 
+                    />
                     <div className="flex items-center gap-1">
                       <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                       <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
@@ -317,8 +341,9 @@ const LearningActivity = () => {
                 <p className="text-muted-foreground mb-4">
                   You've successfully completed this activity. Would you like to try another one?
                 </p>
-                <div className="flex justify-center gap-4">
-                  <Button variant="outline" onClick={() => navigate('/learning')}>
+                <div className="flex justify-center gap-4 flex-wrap">
+                  <Button variant="outline" onClick={goToMoreActivities}>
+                    <Grid3X3 className="mr-2 h-4 w-4" />
                     More Activities
                   </Button>
                   <Button onClick={() => {
@@ -326,6 +351,7 @@ const LearningActivity = () => {
                     setProgress(0);
                     setCurrentStep(0);
                   }}>
+                    <ArrowLeft className="mr-2 h-4 w-4" />
                     Try Again
                   </Button>
                 </div>

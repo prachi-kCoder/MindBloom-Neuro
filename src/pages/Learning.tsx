@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -136,15 +136,33 @@ const SPECIALIZED_ACTIVITIES = {
 
 const Learning = () => {
   const navigate = useNavigate();
-  const [showIntro, setShowIntro] = useState(true);
-  const [selectedAgeGroup, setSelectedAgeGroup] = useState("");
-  const [selectedDisability, setSelectedDisability] = useState("");
+  const location = useLocation();
+  
+  // Initialize state from location if available
+  const [showIntro, setShowIntro] = useState(() => {
+    return location.state?.showIntro !== false;
+  });
+  
+  const [selectedAgeGroup, setSelectedAgeGroup] = useState(() => {
+    return location.state?.ageGroup || "";
+  });
+  
+  const [selectedDisability, setSelectedDisability] = useState(() => {
+    return location.state?.disabilityType || "";
+  });
   
   const handleStartLearning = (ageGroup: string, disabilityType: string) => {
     setSelectedAgeGroup(ageGroup);
     setSelectedDisability(disabilityType);
     setShowIntro(false);
   };
+  
+  // Reset location state after using it
+  useEffect(() => {
+    if (location.state) {
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
   
   // Filter age groups to only show relevant ones based on selection
   const filteredAgeGroups = selectedAgeGroup 

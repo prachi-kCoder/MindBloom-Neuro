@@ -27,9 +27,9 @@ const LearningIntroduction: React.FC<LearningIntroProps> = ({ onStart }) => {
   ];
   
   const disabilityTypes = [
-    { id: "dyslexia", name: "Dyslexia", icon: <BookOpen className="h-5 w-5 text-soft-pink" /> },
-    { id: "adhd", name: "ADHD", icon: <Smile className="h-5 w-5 text-soft-blue" /> },
-    { id: "asd", name: "ASD (Autism Spectrum Disorder)", icon: <GraduationCap className="h-5 w-5 text-soft-purple" /> }
+    { id: "dyslexia", name: "Dyslexia", icon: <BookOpen className="h-5 w-5 text-soft-pink" />, description: "Support for reading difficulties and letter recognition" },
+    { id: "adhd", name: "ADHD", icon: <Smile className="h-5 w-5 text-soft-blue" />, description: "Activities designed for focus and attention support" },
+    { id: "asd", name: "ASD (Autism Spectrum Disorder)", icon: <GraduationCap className="h-5 w-5 text-soft-purple" />, description: "Structured learning with visual supports" }
   ];
   
   const handleContinue = () => {
@@ -92,7 +92,7 @@ const LearningIntroduction: React.FC<LearningIntroProps> = ({ onStart }) => {
                 {disabilityTypes.map(type => (
                   <div 
                     key={type.id} 
-                    className={`flex items-center space-x-2 p-2 rounded-lg border-2 ${
+                    className={`flex items-center space-x-2 p-3 rounded-lg border-2 ${
                       selectedDisability === type.id ? 'border-primary bg-muted/40' : 'border-transparent'
                     }`}
                   >
@@ -101,8 +101,19 @@ const LearningIntroduction: React.FC<LearningIntroProps> = ({ onStart }) => {
                       htmlFor={`type-${type.id}`} 
                       className="cursor-pointer flex items-center gap-2 w-full"
                     >
-                      {type.icon}
-                      <span>{type.name}</span>
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                        <div className={`p-2 rounded-full ${
+                          type.id === 'dyslexia' ? 'bg-soft-pink/20' : 
+                          type.id === 'adhd' ? 'bg-soft-blue/20' : 
+                          'bg-soft-purple/20'
+                        }`}>
+                          {type.icon}
+                        </div>
+                        <div>
+                          <div className="font-medium">{type.name}</div>
+                          <div className="text-xs text-muted-foreground">{type.description}</div>
+                        </div>
+                      </div>
                     </Label>
                   </div>
                 ))}
