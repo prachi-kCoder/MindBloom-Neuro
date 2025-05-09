@@ -32,6 +32,9 @@ const Navbar = () => {
           <Link to="/appointments" className="text-sm font-medium hover:text-primary transition-colors">
             Appointments
           </Link>
+          <Link to="/learning" className="text-sm font-medium hover:text-primary transition-colors">
+            Learning
+          </Link>
           <Link to="/community" className="text-sm font-medium hover:text-primary transition-colors">
             Community
           </Link>
@@ -122,6 +125,13 @@ const Navbar = () => {
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Appointments
+                  </Link>
+                  <Link 
+                    to="/learning" 
+                    className="px-2 py-1 text-lg hover:text-primary transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Learning
                   </Link>
                   <Link 
                     to="/community" 

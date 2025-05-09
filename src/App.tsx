@@ -15,6 +15,8 @@ import Contact from "@/pages/Contact";
 import Login from "@/pages/Login";
 import Profile from "@/pages/Profile";
 import NotFound from "@/pages/NotFound";
+import Learning from "@/pages/Learning";
+import LearningActivity from "@/pages/LearningActivity";
 
 function App() {
   const location = useLocation();
@@ -36,6 +38,8 @@ function App() {
       <Route path="/contact" element={<Contact />} />
       <Route path="/login" element={<Login />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/learning" element={<Learning />} />
+      <Route path="/learning/:ageGroup/:activityId" element={<LearningActivity />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
