@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { motion } from 'framer-motion';
-import { BookOpen, Smile, GraduationCap, ArrowRight } from 'lucide-react';
+import { BookOpen, Smile, GraduationCap, ArrowRight, Sparkles } from 'lucide-react';
 import FullScreenToggle from './FullScreenToggle';
 
 interface LearningIntroProps {
@@ -34,21 +34,24 @@ const LearningIntroduction: React.FC<LearningIntroProps> = ({ onStart }) => {
       name: "Dyslexia", 
       icon: <BookOpen className="h-5 w-5 text-white" />, 
       description: "Support for reading difficulties and letter recognition",
-      color: "from-soft-pink to-soft-pink/70"
+      color: "from-soft-pink to-soft-pink/70",
+      quote: "Your unique perspective helps you see what others might miss. Your creativity is your superpower!"
     },
     { 
       id: "adhd", 
       name: "ADHD", 
       icon: <Smile className="h-5 w-5 text-white" />, 
       description: "Activities designed for focus and attention support",
-      color: "from-soft-blue to-soft-blue/70" 
+      color: "from-soft-blue to-soft-blue/70",
+      quote: "Your endless energy and enthusiasm can move mountains! Your mind works at amazing speeds!"
     },
     { 
       id: "asd", 
       name: "ASD (Autism Spectrum Disorder)", 
       icon: <GraduationCap className="h-5 w-5 text-white" />, 
       description: "Structured learning with visual supports",
-      color: "from-soft-purple to-soft-purple/70" 
+      color: "from-soft-purple to-soft-purple/70",
+      quote: "Your attention to detail and deep focus are incredible gifts. Your unique way of seeing the world matters!" 
     }
   ];
   
@@ -74,8 +77,16 @@ const LearningIntroduction: React.FC<LearningIntroProps> = ({ onStart }) => {
     } else if (!selectedDisability) {
       return "Great choice! Now, let's find which learning support works best for you!";
     } else {
-      return "Perfect! We're all set to start our learning journey together. Click the button below when you're ready!";
+      const selectedType = disabilityTypes.find(type => type.id === selectedDisability);
+      return `Perfect! ${selectedType?.quote} We're all set to start our learning journey together!`;
     }
+  };
+
+  // Get motivational quote based on selected disability
+  const getMotivationalQuote = () => {
+    if (!selectedDisability) return null;
+    const selectedType = disabilityTypes.find(type => type.id === selectedDisability);
+    return selectedType?.quote;
   };
 
   return (
@@ -145,9 +156,9 @@ const LearningIntroduction: React.FC<LearningIntroProps> = ({ onStart }) => {
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
-                className={selectedAge ? "opacity-50" : ""}
+                className={selectedAge ? "opacity-70 transition-opacity" : ""}
               >
-                <h3 className="text-xl font-bold mb-4 text-foreground flex items-center gap-2">
+                <h3 className="text-2xl font-bold mb-4 text-foreground flex items-center gap-2">
                   <span className="bg-primary text-white w-8 h-8 rounded-full flex items-center justify-center text-sm">1</span>
                   How old are you?
                 </h3>
@@ -201,16 +212,32 @@ const LearningIntroduction: React.FC<LearningIntroProps> = ({ onStart }) => {
                   height: "auto",
                 }}
                 transition={{ duration: 0.5 }}
+                className={!selectedAge ? "pointer-events-none" : ""}
               >
-                <h3 className="text-xl font-bold mb-4 text-foreground flex items-center gap-2">
+                <h3 className="text-2xl font-bold mb-4 text-foreground flex items-center gap-2">
                   <span className="bg-primary text-white w-8 h-8 rounded-full flex items-center justify-center text-sm">2</span>
                   Select learning support:
                 </h3>
                 
+                <motion.div 
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="mb-6 p-4 bg-secondary/30 rounded-lg border border-primary/20"
+                >
+                  <div className="flex items-center gap-2 text-lg font-medium text-primary">
+                    <Sparkles className="h-5 w-5" />
+                    <span>Discover your unique learning path</span>
+                  </div>
+                  <p className="text-muted-foreground mt-1">
+                    Your different abilities are your strength. Select the support that works best for you!
+                  </p>
+                </motion.div>
+                
                 <RadioGroup 
                   value={selectedDisability} 
                   onValueChange={setSelectedDisability}
-                  className="space-y-3"
+                  className="space-y-4"
                 >
                   {disabilityTypes.map(type => (
                     <div 
@@ -229,7 +256,7 @@ const LearningIntroduction: React.FC<LearningIntroProps> = ({ onStart }) => {
                       />
                       <Label 
                         htmlFor={`type-${type.id}`} 
-                        className={`cursor-pointer block overflow-hidden rounded-lg ${!selectedAge ? 'opacity-50' : ''}`}
+                        className={`cursor-pointer block overflow-hidden rounded-lg ${!selectedAge ? 'opacity-60' : ''}`}
                       >
                         <div className={`bg-gradient-to-r ${type.color} px-5 py-4`}>
                           <div className="flex items-center gap-4">
@@ -254,6 +281,17 @@ const LearningIntroduction: React.FC<LearningIntroProps> = ({ onStart }) => {
                         </div>
                         <div className="p-4">
                           <p className="text-muted-foreground">{type.description}</p>
+                          {selectedDisability === type.id && (
+                            <motion.div
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              className="mt-3 p-3 bg-secondary/30 rounded-md border border-primary/10"
+                            >
+                              <p className="text-primary font-medium text-sm italic">
+                                "{type.quote}"
+                              </p>
+                            </motion.div>
+                          )}
                         </div>
                       </Label>
                     </div>
