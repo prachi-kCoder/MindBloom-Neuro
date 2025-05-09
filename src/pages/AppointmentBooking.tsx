@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -13,8 +12,15 @@ import { format } from 'date-fns';
 import { Professional } from '@/components/appointments/ProfessionalCard';
 import { useToast } from '@/hooks/use-toast';
 
+// Extended Professional interface to include availableTimeSlots
+interface ExtendedProfessional extends Professional {
+  availableTimeSlots?: {
+    [key: string]: string[];
+  };
+}
+
 // Mock data for professionals - accessing by ID
-const PROFESSIONALS = [
+const PROFESSIONALS: ExtendedProfessional[] = [
   {
     id: "1",
     name: "Dr. Sarah Johnson",
@@ -117,7 +123,7 @@ const AppointmentBooking = () => {
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
 
-  const [professional, setProfessional] = useState<Professional | null>(null);
+  const [professional, setProfessional] = useState<ExtendedProfessional | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<string>("initial");
