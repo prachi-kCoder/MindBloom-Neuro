@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,19 +9,25 @@ import { ArrowLeft, Star } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 
-// Import specific learning components
+// Import learning components
 import AlphabetLearning from '@/components/learning/AlphabetLearning';
 import ColoringActivity from '@/components/learning/ColoringActivity';
 import FlashcardActivity from '@/components/learning/FlashcardActivity';
+import FullScreenToggle from '@/components/learning/FullScreenToggle';
 
 const LearningActivity = () => {
   const { ageGroup, activityId } = useParams<{ ageGroup: string, activityId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+  
+  // Get disability type from location state
+  const disabilityType = location.state?.disabilityType || 'dyslexia';
   
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Activity configuration based on age group and activity ID
   const getActivityComponent = () => {
@@ -32,6 +38,7 @@ const LearningActivity = () => {
           currentStep={currentStep} 
           setCurrentStep={setCurrentStep}
           ageGroup={ageGroup}
+          disabilityType={disabilityType}
         />;
       } else if (activityId === 'coloring') {
         return <ColoringActivity 
@@ -39,6 +46,7 @@ const LearningActivity = () => {
           currentStep={currentStep} 
           setCurrentStep={setCurrentStep}
           ageGroup={ageGroup}
+          disabilityType={disabilityType}
         />;
       }
     }
@@ -50,6 +58,7 @@ const LearningActivity = () => {
       setCurrentStep={setCurrentStep}
       ageGroup={ageGroup || '0-3'} 
       activityType={activityId || 'general'}
+      disabilityType={disabilityType}
     />;
   };
 
@@ -81,39 +90,96 @@ const LearningActivity = () => {
     }
   };
 
-  // Activity details
+  // Activity details based on disability type
   const getActivityDetails = () => {
-    if (ageGroup === '0-3') {
-      if (activityId === 'alphabet') {
-        return {
-          title: "Alphabet Recognition",
-          description: "Learn to recognize letters with fun images and sounds",
-          totalSteps: 6,
-          tutorName: "Miss Sunny",
-          tutorAvatar: "https://ui-avatars.com/api/?name=Miss+Sunny&background=FFD700&color=fff"
-        };
-      } else if (activityId === 'coloring') {
-        return {
-          title: "Coloring Fun",
-          description: "Color fun pictures and learn about objects",
-          totalSteps: 4,
-          tutorName: "Mr. Rainbow",
-          tutorAvatar: "https://ui-avatars.com/api/?name=Mr+Rainbow&background=6A5ACD&color=fff"
-        };
+    const baseDetails: {[key: string]: any} = {
+      "alphabet": {
+        title: "Alphabet Recognition",
+        description: "Learn to recognize letters with fun images and sounds",
+        totalSteps: 6,
+        tutorName: "Miss Sunny",
+        tutorAvatar: "https://ui-avatars.com/api/?name=Miss+Sunny&background=FFD700&color=fff"
+      },
+      "coloring": {
+        title: "Coloring Fun", 
+        description: "Color fun pictures and learn about objects",
+        totalSteps: 4,
+        tutorName: "Mr. Rainbow",
+        tutorAvatar: "https://ui-avatars.com/api/?name=Mr+Rainbow&background=6A5ACD&color=fff"
       }
-    }
+    };
     
-    // Default activity details
-    return {
+    // Special details for disabilities
+    const disabilityDetails: {[key: string]: any} = {
+      "dyslexia": {
+        "alphabet": {
+          title: "Letter Recognition for Dyslexia",
+          description: "Learn to tell similar letters apart with special techniques",
+          benefits: ["Visual Processing", "Letter Recognition", "Reading Readiness"]
+        },
+        "letter-compare": {
+          title: "Similar Letters Comparison",
+          description: "Practice identifying commonly confused letters",
+          totalSteps: 5,
+          tutorName: "Dr. Reader",
+          tutorAvatar: "https://ui-avatars.com/api/?name=Dr+Reader&background=FF7F50&color=fff",
+          benefits: ["Visual Discrimination", "Letter Recognition", "Reading Confidence"]
+        }
+      },
+      "adhd": {
+        "alphabet": {
+          title: "Focused Alphabet Learning",
+          description: "Short, engaging alphabet activities with movement breaks",
+          benefits: ["Attention Training", "Focus Building", "Letter Recognition"]
+        },
+        "focus-game": {
+          title: "Focus Challenge",
+          description: "Build focus through fun, quick-reward activities",
+          totalSteps: 4,
+          tutorName: "Coach Attention",
+          tutorAvatar: "https://ui-avatars.com/api/?name=Coach+Attention&background=20B2AA&color=fff",
+          benefits: ["Sustained Attention", "Task Completion", "Working Memory"]
+        }
+      },
+      "asd": {
+        "alphabet": {
+          title: "Structured Alphabet Learning",
+          description: "Predictable routine for learning letters with visual supports",
+          benefits: ["Pattern Recognition", "Visual Learning", "Literacy Foundation"]
+        },
+        "social-stories": {
+          title: "Social Stories",
+          description: "Learn social skills through illustrated stories",
+          totalSteps: 5,
+          tutorName: "Friend Guide",
+          tutorAvatar: "https://ui-avatars.com/api/?name=Friend+Guide&background=4682B4&color=fff",
+          benefits: ["Social Understanding", "Emotional Recognition", "Conversation Skills"]
+        }
+      }
+    };
+    
+    // Get base activity details
+    let details = baseDetails[activityId || "alphabet"] || {
       title: "Learning Activity",
       description: "Interactive learning for development",
       totalSteps: 5,
       tutorName: "Teacher Bloom",
       tutorAvatar: "https://ui-avatars.com/api/?name=Teacher+Bloom&background=9370DB&color=fff"
     };
+    
+    // Override with disability-specific details if available
+    if (disabilityType && disabilityDetails[disabilityType] && disabilityDetails[disabilityType][activityId || ""]) {
+      details = { ...details, ...disabilityDetails[disabilityType][activityId || ""] };
+    }
+    
+    if (!details.benefits) {
+      details.benefits = ["Cognitive Development", "Fine Motor Skills", "Attention & Focus", "Memory Enhancement"];
+    }
+    
+    return details;
   };
 
-  const { title, description, totalSteps, tutorName, tutorAvatar } = getActivityDetails();
+  const { title, description, totalSteps, tutorName, tutorAvatar, benefits } = getActivityDetails();
 
   useEffect(() => {
     // Reset states when activity changes
@@ -122,44 +188,102 @@ const LearningActivity = () => {
     setIsComplete(false);
   }, [ageGroup, activityId]);
 
+  useEffect(() => {
+    // Listen for fullscreen changes
+    const handleFullScreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    
+    document.addEventListener('fullscreenchange', handleFullScreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullScreenChange);
+  }, []);
+
+  // Get disability-specific styles
+  const getDisabilityStyles = () => {
+    switch (disabilityType) {
+      case 'dyslexia':
+        return {
+          backgroundColor: 'bg-soft-pink/10',
+          textColor: 'text-soft-pink',
+          borderColor: 'border-soft-pink',
+          icon: <BookOpen className="h-5 w-5 text-soft-pink" />
+        };
+      case 'adhd':
+        return {
+          backgroundColor: 'bg-soft-blue/10',
+          textColor: 'text-soft-blue',
+          borderColor: 'border-soft-blue',
+          icon: <Star className="h-5 w-5 text-soft-blue" />
+        };
+      case 'asd':
+        return {
+          backgroundColor: 'bg-soft-purple/10',
+          textColor: 'text-soft-purple',
+          borderColor: 'border-soft-purple',
+          icon: <GraduationCap className="h-5 w-5 text-soft-purple" />
+        };
+      default:
+        return {
+          backgroundColor: 'bg-primary/10',
+          textColor: 'text-primary',
+          borderColor: 'border-primary',
+          icon: <BookText className="h-5 w-5 text-primary" />
+        };
+    }
+  };
+
+  const disabilityStyles = getDisabilityStyles();
+
   return (
     <MainLayout>
       <div className="container px-4 py-8">
-        <Button 
-          variant="ghost" 
-          className="mb-6 pl-0" 
-          onClick={() => navigate('/learning')}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Learning Center
-        </Button>
+        {!isFullscreen && (
+          <Button 
+            variant="ghost" 
+            className="mb-6 pl-0" 
+            onClick={() => navigate('/learning')}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Learning Center
+          </Button>
+        )}
         
-        <div className="mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold mb-2">{title}</h1>
-          <p className="text-muted-foreground">{description}</p>
-        </div>
+        {!isFullscreen && (
+          <div className="mb-8">
+            <h1 className="text-2xl md:text-3xl font-bold mb-2">{title}</h1>
+            <p className="text-muted-foreground">{description}</p>
+          </div>
+        )}
         
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-9">
-            <Card className="overflow-hidden mb-6">
+        <div id="learning-content" className={`grid grid-cols-1 lg:grid-cols-12 gap-8 ${isFullscreen ? 'p-4 min-h-screen' : ''}`}>
+          <div className={`${isFullscreen ? 'col-span-12' : 'lg:col-span-9'}`}>
+            <Card className={`overflow-hidden mb-6 ${isFullscreen ? 'min-h-[calc(100vh-80px)]' : ''}`}>
               <CardContent className="p-0">
                 <div className="p-4 bg-muted/30 border-b flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="bg-primary text-white text-xs px-3 py-1 rounded-full">
+                    <div className={`bg-primary text-white text-xs px-3 py-1 rounded-full`}>
                       {ageGroup} Years
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      Step {currentStep + 1} of {totalSteps}
+                    <div className={`text-xs px-3 py-1 rounded-full ${disabilityStyles.backgroundColor} ${disabilityStyles.textColor}`}>
+                      {disabilityType.charAt(0).toUpperCase() + disabilityType.slice(1)} Support
                     </div>
+                    {!isFullscreen && (
+                      <div className="text-sm text-muted-foreground">
+                        Step {currentStep + 1} of {totalSteps}
+                      </div>
+                    )}
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                  <div className="flex items-center gap-2">
+                    <FullScreenToggle containerId="learning-content" />
+                    <div className="flex items-center gap-1">
+                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    </div>
                   </div>
                 </div>
                 
-                <div className="p-6 min-h-[400px]">
+                <div className={`p-6 ${isFullscreen ? 'min-h-[calc(100vh-160px)]' : 'min-h-[400px]'}`}>
                   {getActivityComponent()}
                 </div>
                 
@@ -186,7 +310,7 @@ const LearningActivity = () => {
               </CardContent>
             </Card>
             
-            {isComplete && (
+            {isComplete && !isFullscreen && (
               <div className="p-6 border rounded-lg bg-muted/20 text-center animate-fade-in">
                 <div className="text-4xl mb-4">🎉</div>
                 <h3 className="text-2xl font-bold mb-2">Excellent Work!</h3>
@@ -209,49 +333,59 @@ const LearningActivity = () => {
             )}
           </div>
           
-          <div className="lg:col-span-3">
-            <div className="bg-card rounded-lg p-5 border mb-6">
-              <div className="flex flex-col items-center text-center mb-4">
-                <Avatar className="h-20 w-20 mb-3">
-                  <AvatarImage src={tutorAvatar} alt={tutorName} />
-                  <AvatarFallback>{tutorName[0]}</AvatarFallback>
-                </Avatar>
-                <h3 className="font-semibold text-lg">{tutorName}</h3>
-                <p className="text-sm text-muted-foreground">Your Learning Guide</p>
+          {!isFullscreen && (
+            <div className="lg:col-span-3">
+              <div className="bg-card rounded-lg p-5 border mb-6">
+                <div className="flex flex-col items-center text-center mb-4">
+                  <Avatar className="h-20 w-20 mb-3">
+                    <AvatarImage src={tutorAvatar} alt={tutorName} />
+                    <AvatarFallback>{tutorName[0]}</AvatarFallback>
+                  </Avatar>
+                  <h3 className="font-semibold text-lg">{tutorName}</h3>
+                  <p className="text-sm text-muted-foreground">Your Learning Guide</p>
+                </div>
+                
+                <div className="text-sm space-y-1">
+                  <p className="py-2 border-t">
+                    I'll guide you through this activity and provide helpful tips along the way!
+                  </p>
+                  <p className="italic text-muted-foreground">
+                    Parents: Stay nearby to assist when needed
+                  </p>
+                </div>
               </div>
               
-              <div className="text-sm space-y-1">
-                <p className="py-2 border-t">
-                  I'll guide you through this activity and provide helpful tips along the way!
-                </p>
-                <p className="italic text-muted-foreground">
-                  Parents: Stay nearby to assist when needed
+              <div className="bg-card rounded-lg p-5 border mb-6">
+                <h3 className="font-semibold mb-3">Learning Benefits</h3>
+                <ul className="text-sm space-y-2">
+                  {Array.isArray(benefits) && benefits.map((benefit, index) => (
+                    <li key={index} className="flex items-center gap-2">
+                      <div className={`h-2 w-2 rounded-full ${
+                        index % 4 === 0 ? "bg-soft-blue" :
+                        index % 4 === 1 ? "bg-soft-pink" :
+                        index % 4 === 2 ? "bg-soft-peach" : "bg-soft-purple"
+                      }`}></div>
+                      <span>{benefit}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div className={`rounded-lg p-5 border mb-6 ${disabilityStyles.backgroundColor} ${disabilityStyles.borderColor}`}>
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  {disabilityType.charAt(0).toUpperCase() + disabilityType.slice(1)} Support
+                </h3>
+                <p className="text-sm">
+                  {disabilityType === 'dyslexia' && 
+                    "These activities provide visual cues and multisensory approaches to help with letter recognition and reading fundamentals."}
+                  {disabilityType === 'adhd' && 
+                    "Activities feature short, engaging segments with clear rewards to maintain focus and build attention skills."}
+                  {disabilityType === 'asd' && 
+                    "Clear structure, visual supports, and predictable patterns help make learning accessible and reduce anxiety."}
                 </p>
               </div>
             </div>
-            
-            <div className="bg-card rounded-lg p-5 border mb-6">
-              <h3 className="font-semibold mb-3">Learning Benefits</h3>
-              <ul className="text-sm space-y-2">
-                <li className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-soft-blue"></div>
-                  <span>Cognitive Development</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-soft-pink"></div>
-                  <span>Fine Motor Skills</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-soft-peach"></div>
-                  <span>Attention & Focus</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-soft-purple"></div>
-                  <span>Memory Enhancement</span>
-                </li>
-              </ul>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </MainLayout>
@@ -259,3 +393,6 @@ const LearningActivity = () => {
 };
 
 export default LearningActivity;
+
+// Import required icons
+import { BookOpen, BookText, GraduationCap } from 'lucide-react';

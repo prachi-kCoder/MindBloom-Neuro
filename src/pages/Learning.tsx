@@ -1,11 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Book, GamepadIcon, BookOpen, BookText, Star } from 'lucide-react';
+import { Book, GamepadIcon, BookOpen, BookText, Star, GraduationCap } from 'lucide-react';
+import LearningIntroduction from '@/components/learning/LearningIntroduction';
 
 const AGE_GROUPS = [
   {
@@ -108,56 +109,137 @@ const AGE_GROUPS = [
   }
 ];
 
+// Additional specialized activities for each disability type
+const SPECIALIZED_ACTIVITIES = {
+  dyslexia: [
+    { id: "letter-compare", name: "Similar Letters", icon: "🔠", type: "activity", ageGroups: ["0-3", "3-4", "4-5"] },
+    { id: "word-building", name: "Word Builder", icon: "📝", type: "game", ageGroups: ["4-5", "5-6", "6-8"] },
+    { id: "phonics-game", name: "Phonics Fun", icon: "🔊", type: "game", ageGroups: ["3-4", "4-5", "5-6"] },
+    { id: "story-pictures", name: "Picture Stories", icon: "📚", type: "activity", ageGroups: ["6-8", "8-10"] },
+    { id: "visual-memory", name: "Visual Memory", icon: "👁️", type: "game", ageGroups: ["4-5", "5-6", "6-8"] },
+  ],
+  adhd: [
+    { id: "focus-game", name: "Focus Challenge", icon: "🎯", type: "game", ageGroups: ["4-5", "5-6", "6-8"] },
+    { id: "timer-activities", name: "Timer Tasks", icon: "⏱️", type: "activity", ageGroups: ["6-8", "8-10"] },
+    { id: "memory-sequence", name: "Memory Sequence", icon: "🔢", type: "game", ageGroups: ["3-4", "4-5", "5-6"] },
+    { id: "calming-activities", name: "Calm Down Corner", icon: "😌", type: "activity", ageGroups: ["0-3", "3-4", "4-5"] },
+    { id: "movement-breaks", name: "Movement Breaks", icon: "🤸", type: "activity", ageGroups: ["5-6", "6-8", "8-10"] },
+  ],
+  asd: [
+    { id: "social-stories", name: "Social Stories", icon: "👥", type: "activity", ageGroups: ["3-4", "4-5", "5-6"] },
+    { id: "emotion-cards", name: "Emotion Cards", icon: "😊", type: "game", ageGroups: ["4-5", "5-6", "6-8"] },
+    { id: "sensory-activities", name: "Sensory Play", icon: "✋", type: "activity", ageGroups: ["0-3", "3-4"] },
+    { id: "routine-builder", name: "Routine Builder", icon: "📅", type: "activity", ageGroups: ["6-8", "8-10"] },
+    { id: "calm-space", name: "Calm Space", icon: "🧘", type: "activity", ageGroups: ["3-4", "4-5", "5-6"] },
+  ]
+};
+
 const Learning = () => {
+  const navigate = useNavigate();
+  const [showIntro, setShowIntro] = useState(true);
+  const [selectedAgeGroup, setSelectedAgeGroup] = useState("");
+  const [selectedDisability, setSelectedDisability] = useState("");
+  
+  const handleStartLearning = (ageGroup: string, disabilityType: string) => {
+    setSelectedAgeGroup(ageGroup);
+    setSelectedDisability(disabilityType);
+    setShowIntro(false);
+  };
+  
+  // Filter age groups to only show relevant ones based on selection
+  const filteredAgeGroups = selectedAgeGroup 
+    ? AGE_GROUPS.filter(group => group.id === selectedAgeGroup)
+    : AGE_GROUPS;
+
+  // Get specialized activities for the selected disability and age group
+  const getSpecializedActivities = (ageGroupId: string) => {
+    if (!selectedDisability) return [];
+    
+    return SPECIALIZED_ACTIVITIES[selectedDisability as keyof typeof SPECIALIZED_ACTIVITIES]
+      .filter(activity => activity.ageGroups.includes(ageGroupId));
+  };
+  
+  // Combine regular and specialized activities
+  const getCombinedActivities = (ageGroup: typeof AGE_GROUPS[0]) => {
+    const specializedActivities = getSpecializedActivities(ageGroup.id);
+    return [...ageGroup.activities, ...specializedActivities];
+  };
+
   return (
     <MainLayout>
       <div className="container px-4 py-8 md:py-12">
-        <div className="flex flex-col gap-6">
-          <div className="text-center max-w-3xl mx-auto mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Interactive Learning Center</h1>
-            <p className="text-lg text-muted-foreground">
-              Engaging, age-appropriate activities to foster growth and development for children with neurodevelopmental needs
-            </p>
+        {showIntro ? (
+          <div className="max-w-4xl mx-auto">
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-8 text-center">
+              Welcome to the Learning Center
+            </h1>
+            <LearningIntroduction onStart={handleStartLearning} />
           </div>
-
-          <div className="mb-10">
-            <Tabs defaultValue="all" className="w-full">
-              <div className="flex justify-center mb-6">
-                <TabsList className="grid grid-cols-2 md:grid-cols-3 w-full max-w-lg">
-                  <TabsTrigger value="all">All Ages</TabsTrigger>
-                  <TabsTrigger value="games">Games</TabsTrigger>
-                  <TabsTrigger value="activities">Activities</TabsTrigger>
-                </TabsList>
+        ) : (
+          <div className="flex flex-col gap-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">
+                  Interactive Learning Center
+                </h1>
+                <p className="text-lg text-muted-foreground mb-4">
+                  Engaging, age-appropriate activities designed for {selectedDisability} support
+                </p>
               </div>
               
-              <TabsContent value="all" className="space-y-8">
-                {AGE_GROUPS.map((group) => (
-                  <AgeGroupSection key={group.id} group={group} />
-                ))}
-              </TabsContent>
-              
-              <TabsContent value="games" className="space-y-8">
-                {AGE_GROUPS.map((group) => (
-                  <AgeGroupSection 
-                    key={group.id} 
-                    group={group} 
-                    filterType="game"
-                  />
-                ))}
-              </TabsContent>
-              
-              <TabsContent value="activities" className="space-y-8">
-                {AGE_GROUPS.map((group) => (
-                  <AgeGroupSection 
-                    key={group.id} 
-                    group={group} 
-                    filterType="activity"
-                  />
-                ))}
-              </TabsContent>
-            </Tabs>
+              <Button variant="outline" onClick={() => setShowIntro(true)}>
+                Change Age/Support
+              </Button>
+            </div>
+
+            <div className="mb-8">
+              <Tabs defaultValue="all" className="w-full">
+                <div className="flex justify-center mb-6">
+                  <TabsList className="grid grid-cols-2 md:grid-cols-3 w-full max-w-lg">
+                    <TabsTrigger value="all">All Activities</TabsTrigger>
+                    <TabsTrigger value="games">Games</TabsTrigger>
+                    <TabsTrigger value="activities">Learning Activities</TabsTrigger>
+                  </TabsList>
+                </div>
+                
+                <TabsContent value="all" className="space-y-8">
+                  {filteredAgeGroups.map((group) => (
+                    <AgeGroupSection 
+                      key={group.id} 
+                      group={group} 
+                      specialActivities={getSpecializedActivities(group.id)}
+                      disabilityType={selectedDisability}
+                    />
+                  ))}
+                </TabsContent>
+                
+                <TabsContent value="games" className="space-y-8">
+                  {filteredAgeGroups.map((group) => (
+                    <AgeGroupSection 
+                      key={group.id} 
+                      group={group} 
+                      filterType="game"
+                      specialActivities={getSpecializedActivities(group.id)}
+                      disabilityType={selectedDisability}
+                    />
+                  ))}
+                </TabsContent>
+                
+                <TabsContent value="activities" className="space-y-8">
+                  {filteredAgeGroups.map((group) => (
+                    <AgeGroupSection 
+                      key={group.id} 
+                      group={group} 
+                      filterType="activity"
+                      specialActivities={getSpecializedActivities(group.id)}
+                      disabilityType={selectedDisability}
+                    />
+                  ))}
+                </TabsContent>
+              </Tabs>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </MainLayout>
   );
@@ -166,14 +248,39 @@ const Learning = () => {
 interface AgeGroupSectionProps {
   group: typeof AGE_GROUPS[0];
   filterType?: string;
+  specialActivities?: any[];
+  disabilityType?: string;
 }
 
-const AgeGroupSection = ({ group, filterType }: AgeGroupSectionProps) => {
+const AgeGroupSection = ({ 
+  group, 
+  filterType, 
+  specialActivities = [],
+  disabilityType = ''
+}: AgeGroupSectionProps) => {
+  // Combine regular activities with special activities for this disability type
+  let allActivities = [...group.activities, ...specialActivities];
+  
+  // Apply type filter if specified
   const activities = filterType 
-    ? group.activities.filter(activity => activity.type === filterType)
-    : group.activities;
+    ? allActivities.filter(activity => activity.type === filterType)
+    : allActivities;
   
   if (activities.length === 0) return null;
+  
+  // Get icon based on disability type
+  const getDisabilityIcon = () => {
+    switch(disabilityType) {
+      case 'dyslexia':
+        return <BookOpen className="h-4 w-4 text-soft-pink" />;
+      case 'adhd':
+        return <Star className="h-4 w-4 text-soft-blue" />;
+      case 'asd':
+        return <GraduationCap className="h-4 w-4 text-soft-purple" />;
+      default:
+        return null;
+    }
+  };
   
   return (
     <section className="py-6" id={`age-${group.id}`}>
@@ -198,15 +305,19 @@ const AgeGroupSection = ({ group, filterType }: AgeGroupSectionProps) => {
                   <span className="text-2xl">{activity.icon}</span>
                   {activity.name}
                 </CardTitle>
-                <div className="px-2 py-1 text-xs rounded-full bg-background">
+                <div className="px-2 py-1 text-xs rounded-full bg-background flex items-center gap-1">
                   {activity.type === 'game' ? 'Game' : 'Activity'}
+                  {specialActivities.includes(activity) && getDisabilityIcon()}
                 </div>
               </div>
             </CardHeader>
             <CardContent className="pt-4">
               <div className="flex justify-end">
                 <Button asChild>
-                  <Link to={`/learning/${group.id}/${activity.id}`}>
+                  <Link 
+                    to={`/learning/${group.id}/${activity.id}`}
+                    state={{ disabilityType: disabilityType }}
+                  >
                     Start
                   </Link>
                 </Button>
