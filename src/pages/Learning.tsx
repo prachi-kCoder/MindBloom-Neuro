@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Book, Book as BookIcon, GamepadIcon, BookOpen, BookText, Star, GraduationCap, Brain } from 'lucide-react';
 import LearningIntroduction from '@/components/learning/LearningIntroduction';
+import useDyslexiaFont from '@/hooks/useDyslexiaFont';
 
 const AGE_GROUPS = [
   {
@@ -95,7 +96,8 @@ const AGE_GROUPS = [
       { id: "memory-maze", name: "Memory Maze", icon: "🧠", type: "game" },
       { id: "fractions", name: "Fraction Games", icon: "½", type: "game" },
       { id: "science-project", name: "Science Experiments", icon: "🧪", type: "activity" },
-      { id: "storytelling", name: "Interactive Stories", icon: "📝", type: "game" },
+      { id: "word-match-safari", name: "Word Match Safari", icon: "🦁", type: "game" },
+      { id: "synonym-island", name: "Synonym Island", icon: "🏝️", type: "game" },
     ]
   },
   {
@@ -111,6 +113,7 @@ const AGE_GROUPS = [
       { id: "debates", name: "Debate Challenge", icon: "🎯", type: "activity" },
       { id: "research", name: "Research Quest", icon: "🔍", type: "game" },
       { id: "advanced-math", name: "Advanced Math", icon: "➗", type: "game" },
+      { id: "antonym-mountain", name: "Antonym Mountain", icon: "🏔️", type: "game" },
     ]
   }
 ];
@@ -128,6 +131,9 @@ const SPECIALIZED_ACTIVITIES = {
     { id: "lexicon-league", name: "Vocabulary Builder", icon: "📚", type: "game", ageGroups: ["8-10", "10-12"] },
     { id: "sound-match", name: "Sound Match", icon: "🎵", type: "game", ageGroups: ["8-10"] },
     { id: "word-detective", name: "Word Detective", icon: "🔍", type: "game", ageGroups: ["10-12"] },
+    { id: "word-match-safari", name: "Synonym & Antonym Safari", icon: "🦁", type: "game", ageGroups: ["8-10"] },
+    { id: "synonym-island", name: "Synonym Island Adventure", icon: "🏝️", type: "game", ageGroups: ["8-10"] },
+    { id: "antonym-mountain", name: "Antonym Mountain Trek", icon: "🏔️", type: "game", ageGroups: ["10-12"] },
   ],
   adhd: [
     { id: "focus-game", name: "Focus Challenge", icon: "🎯", type: "game", ageGroups: ["4-5", "5-6", "6-8"] },
@@ -139,6 +145,9 @@ const SPECIALIZED_ACTIVITIES = {
     { id: "memory-maze", name: "Focus Challenge", icon: "🧠", type: "game", ageGroups: ["6-8", "8-10"] },
     { id: "lexicon-league", name: "Word Power", icon: "📚", type: "game", ageGroups: ["8-10", "10-12"] },
     { id: "mind-vault", name: "Mind Vault", icon: "🔐", type: "game", ageGroups: ["10-12"] },
+    { id: "word-match-safari", name: "Word Matching Challenge", icon: "🎯", type: "game", ageGroups: ["8-10"] },
+    { id: "synonym-island", name: "Synonym Treasure Hunt", icon: "💎", type: "game", ageGroups: ["8-10"] },
+    { id: "antonym-mountain", name: "Antonym Explorer", icon: "🧗‍♂️", type: "game", ageGroups: ["10-12"] },
   ],
   asd: [
     { id: "social-stories", name: "Social Stories", icon: "👥", type: "activity", ageGroups: ["3-4", "4-5", "5-6"] },
@@ -150,6 +159,9 @@ const SPECIALIZED_ACTIVITIES = {
     { id: "memory-maze", name: "Sequence Master", icon: "🧠", type: "game", ageGroups: ["6-8", "8-10"] },
     { id: "lexicon-league", name: "Word Categories", icon: "📚", type: "game", ageGroups: ["8-10", "10-12"] },
     { id: "code-clues", name: "Pattern Recognition", icon: "🧩", type: "game", ageGroups: ["10-12"] },
+    { id: "word-match-safari", name: "Structured Word Match", icon: "🦓", type: "game", ageGroups: ["8-10"] },
+    { id: "synonym-island", name: "Synonym Pattern Quest", icon: "🧩", type: "game", ageGroups: ["8-10"] },
+    { id: "antonym-mountain", name: "Antonym Sequence Challenge", icon: "📋", type: "game", ageGroups: ["10-12"] },
   ]
 };
 
@@ -169,6 +181,10 @@ const Learning = () => {
   const [selectedDisability, setSelectedDisability] = useState(() => {
     return location.state?.disabilityType || "";
   });
+  
+  const { useDyslexicFont, setUseDyslexicFont } = useDyslexiaFont(
+    location.state?.disabilityType === 'dyslexia'
+  );
   
   const handleStartLearning = (ageGroup: string, disabilityType: string) => {
     setSelectedAgeGroup(ageGroup);
@@ -201,41 +217,51 @@ const Learning = () => {
     const specializedActivities = getSpecializedActivities(ageGroup.id);
     return [...ageGroup.activities, ...specializedActivities];
   };
+  
+  // Toggle dyslexia font
+  const toggleDyslexicFont = () => {
+    setUseDyslexicFont(!useDyslexicFont);
+  };
 
   return (
     <MainLayout>
       <div className="container px-4 py-8 md:py-12">
         {showIntro ? (
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-8 text-center">
+            <h1 className={`text-3xl md:text-4xl font-bold tracking-tight mb-8 text-center ${useDyslexicFont ? 'font-dyslexic' : ''}`}>
               Welcome to the Learning Center
             </h1>
             <LearningIntroduction onStart={handleStartLearning} />
           </div>
         ) : (
           <div className="flex flex-col gap-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">
+                <h1 className={`text-3xl md:text-4xl font-bold tracking-tight mb-2 ${useDyslexicFont ? 'font-dyslexic' : ''}`}>
                   Interactive Learning Center
                 </h1>
-                <p className="text-lg text-muted-foreground mb-4">
+                <p className={`text-lg text-muted-foreground mb-4 ${useDyslexicFont ? 'font-dyslexic' : ''}`}>
                   Engaging, age-appropriate activities designed for {selectedDisability} support
                 </p>
               </div>
               
-              <Button variant="outline" onClick={() => setShowIntro(true)}>
-                Change Age/Support
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" onClick={toggleDyslexicFont} className="whitespace-nowrap">
+                  {useDyslexicFont ? 'Standard Font' : 'Dyslexia-Friendly Font'}
+                </Button>
+                <Button variant="outline" onClick={() => setShowIntro(true)}>
+                  Change Age/Support
+                </Button>
+              </div>
             </div>
 
             <div className="mb-8">
               <Tabs defaultValue="all" className="w-full">
                 <div className="flex justify-center mb-6">
                   <TabsList className="grid grid-cols-2 md:grid-cols-3 w-full max-w-lg">
-                    <TabsTrigger value="all">All Activities</TabsTrigger>
-                    <TabsTrigger value="games">Games</TabsTrigger>
-                    <TabsTrigger value="activities">Learning Activities</TabsTrigger>
+                    <TabsTrigger value="all" className={useDyslexicFont ? 'font-dyslexic' : ''}>All Activities</TabsTrigger>
+                    <TabsTrigger value="games" className={useDyslexicFont ? 'font-dyslexic' : ''}>Games</TabsTrigger>
+                    <TabsTrigger value="activities" className={useDyslexicFont ? 'font-dyslexic' : ''}>Learning Activities</TabsTrigger>
                   </TabsList>
                 </div>
                 
@@ -246,6 +272,7 @@ const Learning = () => {
                       group={group} 
                       specialActivities={getSpecializedActivities(group.id)}
                       disabilityType={selectedDisability}
+                      useDyslexicFont={useDyslexicFont}
                     />
                   ))}
                 </TabsContent>
@@ -258,6 +285,7 @@ const Learning = () => {
                       filterType="game"
                       specialActivities={getSpecializedActivities(group.id)}
                       disabilityType={selectedDisability}
+                      useDyslexicFont={useDyslexicFont}
                     />
                   ))}
                 </TabsContent>
@@ -270,6 +298,7 @@ const Learning = () => {
                       filterType="activity"
                       specialActivities={getSpecializedActivities(group.id)}
                       disabilityType={selectedDisability}
+                      useDyslexicFont={useDyslexicFont}
                     />
                   ))}
                 </TabsContent>
@@ -287,13 +316,15 @@ interface AgeGroupSectionProps {
   filterType?: string;
   specialActivities?: any[];
   disabilityType?: string;
+  useDyslexicFont?: boolean;
 }
 
 const AgeGroupSection = ({ 
   group, 
   filterType, 
   specialActivities = [],
-  disabilityType = ''
+  disabilityType = '',
+  useDyslexicFont = false
 }: AgeGroupSectionProps) => {
   // Combine regular activities with special activities for this disability type
   let allActivities = [...group.activities, ...specialActivities];
@@ -326,19 +357,19 @@ const AgeGroupSection = ({
           {group.icon}
         </div>
         <div>
-          <h2 className="text-2xl font-bold">{group.name}</h2>
-          <p className="text-sm text-muted-foreground">{group.label}</p>
+          <h2 className={`text-2xl font-bold ${useDyslexicFont ? 'font-dyslexic' : ''}`}>{group.name}</h2>
+          <p className={`text-sm text-muted-foreground ${useDyslexicFont ? 'font-dyslexic' : ''}`}>{group.label}</p>
         </div>
       </div>
       
-      <p className="mb-6 text-muted-foreground max-w-3xl">{group.description}</p>
+      <p className={`mb-6 text-muted-foreground max-w-3xl ${useDyslexicFont ? 'font-dyslexic' : ''}`}>{group.description}</p>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {activities.map((activity) => (
           <Card key={activity.id} className="overflow-hidden transition-all duration-200 hover:shadow-md">
             <CardHeader className={`${group.color} bg-opacity-30 pb-4`}>
               <div className="flex justify-between items-center">
-                <CardTitle className="text-xl flex items-center gap-2">
+                <CardTitle className={`text-xl flex items-center gap-2 ${useDyslexicFont ? 'font-dyslexic' : ''}`}>
                   <span className="text-2xl">{activity.icon}</span>
                   {activity.name}
                 </CardTitle>

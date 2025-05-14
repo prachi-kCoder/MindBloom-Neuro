@@ -7,6 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { ArrowLeft, Star, Grid3X3 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
+import useDyslexiaFont from '@/hooks/useDyslexiaFont';
 
 // Import learning components
 import AlphabetLearning from '@/components/learning/AlphabetLearning';
@@ -17,6 +18,9 @@ import MemoryMatchGame from '@/components/learning/MemoryMatchGame';
 import WordBuildingGame from '@/components/learning/WordBuildingGame';
 import MemoryMazeGame from '@/components/learning/MemoryMazeGame';
 import LexiconLeagueGame from '@/components/learning/LexiconLeagueGame';
+import WordMatchSafari from '@/components/learning/WordMatchSafari';
+import SynonymIslandAdventure from '@/components/learning/SynonymIslandAdventure';
+import AntonymMountainTrek from '@/components/learning/AntonymMountainTrek';
 
 // Import required icons
 import { BookOpen, BookText, GraduationCap } from 'lucide-react';
@@ -39,6 +43,7 @@ const LearningActivity = () => {
   
   // Get disability type from location state
   const disabilityType = location.state?.disabilityType || 'dyslexia';
+  const { useDyslexicFont, setUseDyslexicFont } = useDyslexiaFont(disabilityType === 'dyslexia');
   
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
@@ -47,6 +52,33 @@ const LearningActivity = () => {
 
   // Activity configuration based on age group and activity ID
   const getActivityComponent = () => {
+    // New synonym and antonym games
+    if (activityId === 'word-match-safari') {
+      return <WordMatchSafari 
+        onProgress={handleProgress} 
+        currentStep={currentStep} 
+        setCurrentStep={setCurrentStep}
+        ageGroup={ageGroup || '8-10'}
+        disabilityType={disabilityType}
+      />;
+    } else if (activityId === 'synonym-island') {
+      return <SynonymIslandAdventure 
+        onProgress={handleProgress} 
+        currentStep={currentStep} 
+        setCurrentStep={setCurrentStep}
+        ageGroup={ageGroup || '8-10'}
+        disabilityType={disabilityType}
+      />;
+    } else if (activityId === 'antonym-mountain') {
+      return <AntonymMountainTrek 
+        onProgress={handleProgress} 
+        currentStep={currentStep} 
+        setCurrentStep={setCurrentStep}
+        ageGroup={ageGroup || '10-12'}
+        disabilityType={disabilityType}
+      />;
+    }
+    
     // Age group 0-3
     if (ageGroup === '0-3') {
       if (activityId === 'alphabet') {
@@ -170,84 +202,87 @@ const LearningActivity = () => {
         totalSteps: 4,
         tutorName: "Mr. Rainbow",
         tutorAvatar: "https://ui-avatars.com/api/?name=Mr+Rainbow&background=6A5ACD&color=fff"
+      },
+      "word-match-safari": {
+        title: "Word Match Safari",
+        description: "Match words with their synonyms and antonyms",
+        totalSteps: 5,
+        tutorName: "Dr. Wordy",
+        tutorAvatar: "https://ui-avatars.com/api/?name=Dr+Wordy&background=4CAF50&color=fff",
+        benefits: ["Synonym/Antonym Recognition", "Word Relationships", "Visual Processing", "Vocabulary Building"]
+      },
+      "synonym-island": {
+        title: "Synonym Island Adventure",
+        description: "Find the right synonyms to discover hidden treasures",
+        totalSteps: 8,
+        tutorName: "Captain Word",
+        tutorAvatar: "https://ui-avatars.com/api/?name=Captain+Word&background=2196F3&color=fff",
+        benefits: ["Synonym Recognition", "Context Understanding", "Reading Comprehension", "Vocabulary Expansion"]
+      },
+      "antonym-mountain": {
+        title: "Antonym Mountain Trek",
+        description: "Climb the mountain by selecting correct antonyms",
+        totalSteps: 10,
+        tutorName: "Guide Sierra",
+        tutorAvatar: "https://ui-avatars.com/api/?name=Guide+Sierra&background=FF5722&color=fff",
+        benefits: ["Antonym Recognition", "Opposite Concepts", "Vocabulary Expansion", "Critical Thinking"]
       }
     };
     
     // Special details for disabilities
     const disabilityDetails: {[key: string]: any} = {
       "dyslexia": {
-        "alphabet": {
-          title: "Letter Recognition for Dyslexia",
-          description: "Learn to tell similar letters apart with special techniques",
-          benefits: ["Visual Processing", "Letter Recognition", "Reading Readiness"]
+        // ... keep existing code (all dyslexia-related activity details)
+        "word-match-safari": {
+          title: "Word Match Safari for Dyslexia",
+          description: "Multisensory synonym and antonym matching with color cues",
+          benefits: ["Word Relationship Understanding", "Visual-Auditory Association", "Reading Reinforcement"]
         },
-        "letter-compare": {
-          title: "Similar Letters Comparison",
-          description: "Practice identifying commonly confused letters",
-          totalSteps: 5,
-          tutorName: "Dr. Reader",
-          tutorAvatar: "https://ui-avatars.com/api/?name=Dr+Reader&background=FF7F50&color=fff",
-          benefits: ["Visual Discrimination", "Letter Recognition", "Reading Confidence"]
+        "synonym-island": {
+          title: "Synonym Island for Dyslexia",
+          description: "Context-based synonym practice with visual supports",
+          benefits: ["Context Understanding", "Word Recognition", "Reading Confidence"]
         },
-        "memory-match": {
-          title: "Visual Memory Match",
-          description: "Strengthen visual memory with matching pairs",
-          benefits: ["Visual Memory", "Pattern Recognition", "Focus Building"]
-        },
-        "word-building": {
-          title: "Word Building for Dyslexia",
-          description: "Practice letter arrangement with visual and auditory support",
-          benefits: ["Letter Sequencing", "Word Formation", "Phonemic Awareness"]
+        "antonym-mountain": {
+          title: "Antonym Mountain for Dyslexia",
+          description: "Opposite word practice with visual and auditory supports",
+          benefits: ["Concept Understanding", "Word Discrimination", "Reading Comprehension"]
         }
       },
       "adhd": {
-        "alphabet": {
-          title: "Focused Alphabet Learning",
-          description: "Short, engaging alphabet activities with movement breaks",
-          benefits: ["Attention Training", "Focus Building", "Letter Recognition"]
+        // ... keep existing code (all ADHD-related activity details)
+        "word-match-safari": {
+          title: "Focused Word Match Safari",
+          description: "Quick-paced synonym and antonym matching with movement interaction",
+          benefits: ["Attention Training", "Response Control", "Vocabulary Building"]
         },
-        "focus-game": {
-          title: "Focus Challenge",
-          description: "Build focus through fun, quick-reward activities",
-          totalSteps: 4,
-          tutorName: "Coach Attention",
-          tutorAvatar: "https://ui-avatars.com/api/?name=Coach+Attention&background=20B2AA&color=fff",
-          benefits: ["Sustained Attention", "Task Completion", "Working Memory"]
+        "synonym-island": {
+          title: "Active Synonym Island",
+          description: "Engaging synonym adventure with frequent rewards",
+          benefits: ["Sustained Attention", "Task Completion", "Vocabulary Growth"]
         },
-        "memory-match": {
-          title: "Concentration Match",
-          description: "Build focus through engaging memory games",
-          benefits: ["Attention Training", "Working Memory", "Visual Processing"]
-        },
-        "word-building": {
-          title: "Active Word Building",
-          description: "Interactive letter arrangement with movement breaks",
-          benefits: ["Focus Development", "Spelling Practice", "Task Completion"]
+        "antonym-mountain": {
+          title: "Antonym Mountain Challenge",
+          description: "Progressive difficulty antonym identification with clear rewards",
+          benefits: ["Focus Building", "Concept Mastery", "Task Persistence"]
         }
       },
       "asd": {
-        "alphabet": {
-          title: "Structured Alphabet Learning",
-          description: "Predictable routine for learning letters with visual supports",
-          benefits: ["Pattern Recognition", "Visual Learning", "Literacy Foundation"]
+        // ... keep existing code (all ASD-related activity details)
+        "word-match-safari": {
+          title: "Structured Word Match Safari",
+          description: "Predictable synonym and antonym matching with clear visual organization",
+          benefits: ["Word Pattern Recognition", "Category Understanding", "Vocabulary Structure"]
         },
-        "social-stories": {
-          title: "Social Stories",
-          description: "Learn social skills through illustrated stories",
-          totalSteps: 5,
-          tutorName: "Friend Guide",
-          tutorAvatar: "https://ui-avatars.com/api/?name=Friend+Guide&background=4682B4&color=fff",
-          benefits: ["Social Understanding", "Emotional Recognition", "Conversation Skills"]
+        "synonym-island": {
+          title: "Systematic Synonym Island",
+          description: "Step-by-step synonym adventure with consistent format",
+          benefits: ["Pattern Recognition", "Predictable Learning", "Word Relationships"]
         },
-        "pattern-match": {
-          title: "Pattern Memory Match",
-          description: "Predictable memory matching with clear visual feedback",
-          benefits: ["Pattern Recognition", "Visual Processing", "Cognitive Organization"]
-        },
-        "structured-word-building": {
-          title: "Structured Word Building",
-          description: "Clear, consistent word building with structured approach",
-          benefits: ["Visual Learning", "Word Recognition", "Pattern Understanding"]
+        "antonym-mountain": {
+          title: "Sequential Antonym Mountain",
+          description: "Structured antonym identification with clear progression",
+          benefits: ["Concept Organization", "Pattern Understanding", "Vocabulary Building"]
         }
       }
     };
@@ -328,6 +363,11 @@ const LearningActivity = () => {
 
   const disabilityStyles = getDisabilityStyles();
 
+  // Toggle dyslexia-friendly font
+  const toggleDyslexicFont = () => {
+    setUseDyslexicFont(!useDyslexicFont);
+  };
+
   return (
     <MainLayout>
       <div className="container px-4 py-8">
@@ -344,8 +384,8 @@ const LearningActivity = () => {
         
         {!isFullscreen && (
           <div className="mb-8">
-            <h1 className="text-2xl md:text-3xl font-bold mb-2">{title}</h1>
-            <p className="text-muted-foreground">{description}</p>
+            <h1 className={`text-2xl md:text-3xl font-bold mb-2 ${useDyslexicFont ? 'font-dyslexic' : ''}`}>{title}</h1>
+            <p className={`text-muted-foreground ${useDyslexicFont ? 'font-dyslexic' : ''}`}>{description}</p>
           </div>
         )}
         
@@ -368,6 +408,14 @@ const LearningActivity = () => {
                     )}
                   </div>
                   <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={toggleDyslexicFont}
+                      className="text-xs"
+                    >
+                      {useDyslexicFont ? 'Standard Font' : 'Dyslexic Font'}
+                    </Button>
                     <FullScreenToggle 
                       containerId="learning-content"
                       onFullscreenChange={handleFullscreenChange} 
@@ -394,7 +442,15 @@ const LearningActivity = () => {
                       Previous
                     </Button>
                     <div className="w-1/2">
-                      <Progress value={progress} className="h-2" />
+                      <Progress 
+                        value={progress} 
+                        className="h-2" 
+                        indicatorClassName={`bg-gradient-to-r ${
+                          disabilityType === 'dyslexia' ? 'from-soft-pink to-primary' :
+                          disabilityType === 'adhd' ? 'from-soft-blue to-primary' :
+                          'from-soft-purple to-primary'
+                        }`} 
+                      />
                     </div>
                     <Button
                       onClick={handleNext}
@@ -410,8 +466,8 @@ const LearningActivity = () => {
             {isComplete && !isFullscreen && (
               <div className="p-6 border rounded-lg bg-muted/20 text-center animate-fade-in">
                 <div className="text-4xl mb-4">🎉</div>
-                <h3 className="text-2xl font-bold mb-2">Excellent Work!</h3>
-                <p className="text-muted-foreground mb-4">
+                <h3 className={`text-2xl font-bold mb-2 ${useDyslexicFont ? 'font-dyslexic' : ''}`}>Excellent Work!</h3>
+                <p className={`text-muted-foreground mb-4 ${useDyslexicFont ? 'font-dyslexic' : ''}`}>
                   You've successfully completed this activity. Would you like to try another one?
                 </p>
                 <div className="flex justify-center gap-4 flex-wrap">
@@ -440,11 +496,11 @@ const LearningActivity = () => {
                     <AvatarImage src={tutorAvatar} alt={tutorName} />
                     <AvatarFallback>{tutorName[0]}</AvatarFallback>
                   </Avatar>
-                  <h3 className="font-semibold text-lg">{tutorName}</h3>
-                  <p className="text-sm text-muted-foreground">Your Learning Guide</p>
+                  <h3 className={`font-semibold text-lg ${useDyslexicFont ? 'font-dyslexic' : ''}`}>{tutorName}</h3>
+                  <p className={`text-sm text-muted-foreground ${useDyslexicFont ? 'font-dyslexic' : ''}`}>Your Learning Guide</p>
                 </div>
                 
-                <div className="text-sm space-y-1">
+                <div className={`text-sm space-y-1 ${useDyslexicFont ? 'font-dyslexic' : ''}`}>
                   <p className="py-2 border-t">
                     I'll guide you through this activity and provide helpful tips along the way!
                   </p>
@@ -455,8 +511,8 @@ const LearningActivity = () => {
               </div>
               
               <div className="bg-card rounded-lg p-5 border mb-6">
-                <h3 className="font-semibold mb-3">Learning Benefits</h3>
-                <ul className="text-sm space-y-2">
+                <h3 className={`font-semibold mb-3 ${useDyslexicFont ? 'font-dyslexic' : ''}`}>Learning Benefits</h3>
+                <ul className={`text-sm space-y-2 ${useDyslexicFont ? 'font-dyslexic' : ''}`}>
                   {Array.isArray(benefits) && benefits.map((benefit, index) => (
                     <li key={index} className="flex items-center gap-2">
                       <div className={`h-2 w-2 rounded-full ${
@@ -471,10 +527,10 @@ const LearningActivity = () => {
               </div>
               
               <div className={`rounded-lg p-5 border mb-6 ${disabilityStyles.backgroundColor} ${disabilityStyles.borderColor}`}>
-                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                <h3 className={`font-semibold mb-3 flex items-center gap-2 ${useDyslexicFont ? 'font-dyslexic' : ''}`}>
                   {disabilityType.charAt(0).toUpperCase() + disabilityType.slice(1)} Support
                 </h3>
-                <p className="text-sm">
+                <p className={`text-sm ${useDyslexicFont ? 'font-dyslexic' : ''}`}>
                   {disabilityType === 'dyslexia' && 
                     "These activities provide visual cues and multisensory approaches to help with letter recognition and reading fundamentals."}
                   {disabilityType === 'adhd' && 

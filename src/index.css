@@ -1,4 +1,5 @@
 
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -82,4 +83,44 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Import OpenDyslexic font */
+  @font-face {
+    font-family: 'OpenDyslexic';
+    src: url('https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/open-dyslexic-regular-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'OpenDyslexic';
+    src: url('https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/open-dyslexic-bold-webfont.woff') format('woff');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  /* Apply dyslexic font to specific elements */
+  .font-dyslexic {
+    font-family: 'OpenDyslexic', sans-serif;
+    line-height: 1.5;
+    letter-spacing: 0.01em;
+  }
+
+  /* Apply globally when class is on html element */
+  html.use-dyslexic-font .font-dyslexic,
+  html.use-dyslexic-font h1,
+  html.use-dyslexic-font h2,
+  html.use-dyslexic-font h3,
+  html.use-dyslexic-font h4,
+  html.use-dyslexic-font h5,
+  html.use-dyslexic-font h6,
+  html.use-dyslexic-font p,
+  html.use-dyslexic-font span,
+  html.use-dyslexic-font div,
+  html.use-dyslexic-font button {
+    font-family: 'OpenDyslexic', sans-serif;
+  }
 }
+
