@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Book, GamepadIcon, BookOpen, BookText, Star, GraduationCap } from 'lucide-react';
+import { Book, Book as BookIcon, GamepadIcon, BookOpen, BookText, Star, GraduationCap, Brain } from 'lucide-react';
 import LearningIntroduction from '@/components/learning/LearningIntroduction';
 
 const AGE_GROUPS = [
@@ -89,10 +88,11 @@ const AGE_GROUPS = [
     name: "8–10 Years",
     label: "Middle Primary",
     description: "Reading comprehension, advanced math, science experiments, and creativity",
-    icon: <GamepadIcon className="h-6 w-6 text-accent-foreground" />,
+    icon: <Brain className="h-6 w-6 text-accent-foreground" />,
     color: "bg-accent",
     textColor: "text-accent-foreground",
     activities: [
+      { id: "memory-maze", name: "Memory Maze", icon: "🧠", type: "game" },
       { id: "fractions", name: "Fraction Games", icon: "½", type: "game" },
       { id: "science-project", name: "Science Experiments", icon: "🧪", type: "activity" },
       { id: "storytelling", name: "Interactive Stories", icon: "📝", type: "game" },
@@ -107,6 +107,7 @@ const AGE_GROUPS = [
     color: "bg-destructive/20",
     textColor: "text-destructive",
     activities: [
+      { id: "lexicon-league", name: "Lexicon League", icon: "📚", type: "game" },
       { id: "debates", name: "Debate Challenge", icon: "🎯", type: "activity" },
       { id: "research", name: "Research Quest", icon: "🔍", type: "game" },
       { id: "advanced-math", name: "Advanced Math", icon: "➗", type: "game" },
@@ -123,6 +124,10 @@ const SPECIALIZED_ACTIVITIES = {
     { id: "phonics-game", name: "Phonics Fun", icon: "🔊", type: "game", ageGroups: ["3-4", "4-5", "5-6"] },
     { id: "story-pictures", name: "Picture Stories", icon: "📚", type: "activity", ageGroups: ["6-8", "8-10"] },
     { id: "visual-memory", name: "Visual Memory", icon: "👁️", type: "game", ageGroups: ["4-5", "5-6", "6-8"] },
+    { id: "memory-maze", name: "Memory Focus", icon: "🧠", type: "game", ageGroups: ["6-8", "8-10"] },
+    { id: "lexicon-league", name: "Vocabulary Builder", icon: "📚", type: "game", ageGroups: ["8-10", "10-12"] },
+    { id: "sound-match", name: "Sound Match", icon: "🎵", type: "game", ageGroups: ["8-10"] },
+    { id: "word-detective", name: "Word Detective", icon: "🔍", type: "game", ageGroups: ["10-12"] },
   ],
   adhd: [
     { id: "focus-game", name: "Focus Challenge", icon: "🎯", type: "game", ageGroups: ["4-5", "5-6", "6-8"] },
@@ -131,6 +136,9 @@ const SPECIALIZED_ACTIVITIES = {
     { id: "memory-sequence", name: "Memory Sequence", icon: "🔢", type: "game", ageGroups: ["3-4", "4-5", "5-6"] },
     { id: "calming-activities", name: "Calm Down Corner", icon: "😌", type: "activity", ageGroups: ["0-3", "3-4", "4-5"] },
     { id: "movement-breaks", name: "Movement Breaks", icon: "🤸", type: "activity", ageGroups: ["5-6", "6-8", "8-10"] },
+    { id: "memory-maze", name: "Focus Challenge", icon: "🧠", type: "game", ageGroups: ["6-8", "8-10"] },
+    { id: "lexicon-league", name: "Word Power", icon: "📚", type: "game", ageGroups: ["8-10", "10-12"] },
+    { id: "mind-vault", name: "Mind Vault", icon: "🔐", type: "game", ageGroups: ["10-12"] },
   ],
   asd: [
     { id: "social-stories", name: "Social Stories", icon: "👥", type: "activity", ageGroups: ["3-4", "4-5", "5-6"] },
@@ -139,6 +147,9 @@ const SPECIALIZED_ACTIVITIES = {
     { id: "sensory-activities", name: "Sensory Play", icon: "✋", type: "activity", ageGroups: ["0-3", "3-4"] },
     { id: "routine-builder", name: "Routine Builder", icon: "📅", type: "activity", ageGroups: ["6-8", "8-10"] },
     { id: "calm-space", name: "Calm Space", icon: "🧘", type: "activity", ageGroups: ["3-4", "4-5", "5-6"] },
+    { id: "memory-maze", name: "Sequence Master", icon: "🧠", type: "game", ageGroups: ["6-8", "8-10"] },
+    { id: "lexicon-league", name: "Word Categories", icon: "📚", type: "game", ageGroups: ["8-10", "10-12"] },
+    { id: "code-clues", name: "Pattern Recognition", icon: "🧩", type: "game", ageGroups: ["10-12"] },
   ]
 };
 

@@ -15,6 +15,11 @@ import FlashcardActivity from '@/components/learning/FlashcardActivity';
 import FullScreenToggle from '@/components/learning/FullScreenToggle';
 import MemoryMatchGame from '@/components/learning/MemoryMatchGame';
 import WordBuildingGame from '@/components/learning/WordBuildingGame';
+import MemoryMazeGame from '@/components/learning/MemoryMazeGame';
+import LexiconLeagueGame from '@/components/learning/LexiconLeagueGame';
+
+// Import required icons
+import { BookOpen, BookText, GraduationCap } from 'lucide-react';
 
 // Define extended interface for all possible props in components
 interface ExtendedActivityProps {
@@ -77,6 +82,22 @@ const LearningActivity = () => {
         currentStep={currentStep} 
         setCurrentStep={setCurrentStep}
         ageGroup={ageGroup || '4-5'}
+        disabilityType={disabilityType}
+      />;
+    } else if (activityId === 'memory-maze') {
+      return <MemoryMazeGame 
+        onProgress={handleProgress} 
+        currentStep={currentStep} 
+        setCurrentStep={setCurrentStep}
+        ageGroup={ageGroup || '8-10'}
+        disabilityType={disabilityType}
+      />;
+    } else if (activityId === 'lexicon-league') {
+      return <LexiconLeagueGame 
+        onProgress={handleProgress} 
+        currentStep={currentStep} 
+        setCurrentStep={setCurrentStep}
+        ageGroup={ageGroup || '10-12'}
         disabilityType={disabilityType}
       />;
     }
@@ -471,6 +492,3 @@ const LearningActivity = () => {
 };
 
 export default LearningActivity;
-
-// Import required icons
-import { BookOpen, BookText, GraduationCap } from 'lucide-react';
