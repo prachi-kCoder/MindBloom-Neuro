@@ -20,6 +20,7 @@ const AGE_GROUPS = [
     activities: [
       { id: "alphabet", name: "Alphabet Recognition", icon: "ABC", type: "game" },
       { id: "coloring", name: "Coloring Fun", icon: "🎨", type: "activity" },
+      { id: "memory-match", name: "Memory Match", icon: "🧩", type: "game" },
       { id: "sounds", name: "Animal Sounds", icon: "🐶", type: "game" },
     ]
   },
@@ -33,7 +34,9 @@ const AGE_GROUPS = [
     textColor: "text-soft-pink",
     activities: [
       { id: "shapes", name: "Shape Matching", icon: "⚪", type: "game" },
+      { id: "memory-match", name: "Memory Match", icon: "🧩", type: "game" },
       { id: "words", name: "First Words", icon: "📝", type: "activity" },
+      { id: "coloring", name: "Coloring Fun", icon: "🎨", type: "activity" },
       { id: "sorting", name: "Color Sorting", icon: "🌈", type: "game" },
     ]
   },
@@ -47,7 +50,9 @@ const AGE_GROUPS = [
     textColor: "text-soft-blue",
     activities: [
       { id: "phonics", name: "Phonics Fun", icon: "🔤", type: "game" },
+      { id: "word-building", name: "Word Building", icon: "📝", type: "game" },
       { id: "counting", name: "Counting Adventure", icon: "🔢", type: "activity" },
+      { id: "memory-match", name: "Memory Match", icon: "🧩", type: "game" },
       { id: "stories", name: "Story Time", icon: "📚", type: "activity" },
     ]
   },
@@ -114,12 +119,14 @@ const SPECIALIZED_ACTIVITIES = {
   dyslexia: [
     { id: "letter-compare", name: "Similar Letters", icon: "🔠", type: "activity", ageGroups: ["0-3", "3-4", "4-5"] },
     { id: "word-building", name: "Word Builder", icon: "📝", type: "game", ageGroups: ["4-5", "5-6", "6-8"] },
+    { id: "memory-match", name: "Visual Memory Match", icon: "🧩", type: "game", ageGroups: ["0-3", "3-4", "4-5", "5-6"] },
     { id: "phonics-game", name: "Phonics Fun", icon: "🔊", type: "game", ageGroups: ["3-4", "4-5", "5-6"] },
     { id: "story-pictures", name: "Picture Stories", icon: "📚", type: "activity", ageGroups: ["6-8", "8-10"] },
     { id: "visual-memory", name: "Visual Memory", icon: "👁️", type: "game", ageGroups: ["4-5", "5-6", "6-8"] },
   ],
   adhd: [
     { id: "focus-game", name: "Focus Challenge", icon: "🎯", type: "game", ageGroups: ["4-5", "5-6", "6-8"] },
+    { id: "memory-match", name: "Concentration Match", icon: "🧩", type: "game", ageGroups: ["0-3", "3-4", "4-5", "5-6"] },
     { id: "timer-activities", name: "Timer Tasks", icon: "⏱️", type: "activity", ageGroups: ["6-8", "8-10"] },
     { id: "memory-sequence", name: "Memory Sequence", icon: "🔢", type: "game", ageGroups: ["3-4", "4-5", "5-6"] },
     { id: "calming-activities", name: "Calm Down Corner", icon: "😌", type: "activity", ageGroups: ["0-3", "3-4", "4-5"] },
@@ -127,6 +134,7 @@ const SPECIALIZED_ACTIVITIES = {
   ],
   asd: [
     { id: "social-stories", name: "Social Stories", icon: "👥", type: "activity", ageGroups: ["3-4", "4-5", "5-6"] },
+    { id: "memory-match", name: "Pattern Memory Match", icon: "🧩", type: "game", ageGroups: ["0-3", "3-4", "4-5", "5-6"] },
     { id: "emotion-cards", name: "Emotion Cards", icon: "😊", type: "game", ageGroups: ["4-5", "5-6", "6-8"] },
     { id: "sensory-activities", name: "Sensory Play", icon: "✋", type: "activity", ageGroups: ["0-3", "3-4"] },
     { id: "routine-builder", name: "Routine Builder", icon: "📅", type: "activity", ageGroups: ["6-8", "8-10"] },

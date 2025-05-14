@@ -13,6 +13,8 @@ import AlphabetLearning from '@/components/learning/AlphabetLearning';
 import ColoringActivity from '@/components/learning/ColoringActivity';
 import FlashcardActivity from '@/components/learning/FlashcardActivity';
 import FullScreenToggle from '@/components/learning/FullScreenToggle';
+import MemoryMatchGame from '@/components/learning/MemoryMatchGame';
+import WordBuildingGame from '@/components/learning/WordBuildingGame';
 
 // Define extended interface for all possible props in components
 interface ExtendedActivityProps {
@@ -40,6 +42,7 @@ const LearningActivity = () => {
 
   // Activity configuration based on age group and activity ID
   const getActivityComponent = () => {
+    // Age group 0-3
     if (ageGroup === '0-3') {
       if (activityId === 'alphabet') {
         return <AlphabetLearning 
@@ -57,6 +60,25 @@ const LearningActivity = () => {
           ageGroup={ageGroup}
         />;
       }
+    }
+    
+    // Add new games mapped to their activity IDs
+    if (activityId === 'memory-match') {
+      return <MemoryMatchGame 
+        onProgress={handleProgress} 
+        currentStep={currentStep} 
+        setCurrentStep={setCurrentStep}
+        ageGroup={ageGroup || '0-3'}
+        disabilityType={disabilityType}
+      />;
+    } else if (activityId === 'word-building') {
+      return <WordBuildingGame 
+        onProgress={handleProgress} 
+        currentStep={currentStep} 
+        setCurrentStep={setCurrentStep}
+        ageGroup={ageGroup || '4-5'}
+        disabilityType={disabilityType}
+      />;
     }
     
     // Default component for activities not yet implemented
@@ -145,6 +167,16 @@ const LearningActivity = () => {
           tutorName: "Dr. Reader",
           tutorAvatar: "https://ui-avatars.com/api/?name=Dr+Reader&background=FF7F50&color=fff",
           benefits: ["Visual Discrimination", "Letter Recognition", "Reading Confidence"]
+        },
+        "memory-match": {
+          title: "Visual Memory Match",
+          description: "Strengthen visual memory with matching pairs",
+          benefits: ["Visual Memory", "Pattern Recognition", "Focus Building"]
+        },
+        "word-building": {
+          title: "Word Building for Dyslexia",
+          description: "Practice letter arrangement with visual and auditory support",
+          benefits: ["Letter Sequencing", "Word Formation", "Phonemic Awareness"]
         }
       },
       "adhd": {
@@ -160,6 +192,16 @@ const LearningActivity = () => {
           tutorName: "Coach Attention",
           tutorAvatar: "https://ui-avatars.com/api/?name=Coach+Attention&background=20B2AA&color=fff",
           benefits: ["Sustained Attention", "Task Completion", "Working Memory"]
+        },
+        "memory-match": {
+          title: "Concentration Match",
+          description: "Build focus through engaging memory games",
+          benefits: ["Attention Training", "Working Memory", "Visual Processing"]
+        },
+        "word-building": {
+          title: "Active Word Building",
+          description: "Interactive letter arrangement with movement breaks",
+          benefits: ["Focus Development", "Spelling Practice", "Task Completion"]
         }
       },
       "asd": {
@@ -175,6 +217,16 @@ const LearningActivity = () => {
           tutorName: "Friend Guide",
           tutorAvatar: "https://ui-avatars.com/api/?name=Friend+Guide&background=4682B4&color=fff",
           benefits: ["Social Understanding", "Emotional Recognition", "Conversation Skills"]
+        },
+        "pattern-match": {
+          title: "Pattern Memory Match",
+          description: "Predictable memory matching with clear visual feedback",
+          benefits: ["Pattern Recognition", "Visual Processing", "Cognitive Organization"]
+        },
+        "structured-word-building": {
+          title: "Structured Word Building",
+          description: "Clear, consistent word building with structured approach",
+          benefits: ["Visual Learning", "Word Recognition", "Pattern Understanding"]
         }
       }
     };
