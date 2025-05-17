@@ -17,6 +17,7 @@ import Profile from "@/pages/Profile";
 import NotFound from "@/pages/NotFound";
 import Learning from "@/pages/Learning";
 import LearningActivity from "@/pages/LearningActivity";
+import LearningMaterials from "@/pages/LearningMaterials";
 
 function App() {
   const location = useLocation();
@@ -40,6 +41,7 @@ function App() {
       <Route path="/profile" element={<Profile />} />
       <Route path="/learning" element={<Learning />} />
       <Route path="/learning/:ageGroup/:activityId" element={<LearningActivity />} />
+      <Route path="/learning/materials" element={<LearningMaterials />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

@@ -1,34 +1,48 @@
 
 import { useState, useEffect } from 'react';
 
+interface UseDyslexiaFontOptions {
+  saveToLocalStorage?: boolean;
+  applyGlobally?: boolean;
+}
+
 // Custom hook to manage dyslexia font preference
-export const useDyslexiaFont = (initialValue: boolean = false) => {
+export const useDyslexiaFont = (initialValue: boolean = false, options: UseDyslexiaFontOptions = {}) => {
+  const { saveToLocalStorage = true, applyGlobally = true } = options;
   const [useDyslexicFont, setUseDyslexicFont] = useState(initialValue);
   
   // Load preference from localStorage on mount
   useEffect(() => {
-    const savedPreference = localStorage.getItem('useDyslexicFont');
-    if (savedPreference !== null) {
-      setUseDyslexicFont(savedPreference === 'true');
+    if (saveToLocalStorage) {
+      const savedPreference = localStorage.getItem('useDyslexicFont');
+      if (savedPreference !== null) {
+        setUseDyslexicFont(savedPreference === 'true');
+      }
     }
-  }, []);
+  }, [saveToLocalStorage]);
   
   // Save preference to localStorage when changed
   useEffect(() => {
-    localStorage.setItem('useDyslexicFont', String(useDyslexicFont));
+    if (saveToLocalStorage) {
+      localStorage.setItem('useDyslexicFont', String(useDyslexicFont));
+    }
     
     // Apply font to body when setting changes
-    if (useDyslexicFont) {
-      document.documentElement.classList.add('use-dyslexic-font');
-    } else {
-      document.documentElement.classList.remove('use-dyslexic-font');
+    if (applyGlobally) {
+      if (useDyslexicFont) {
+        document.documentElement.classList.add('use-dyslexic-font');
+      } else {
+        document.documentElement.classList.remove('use-dyslexic-font');
+      }
     }
     
     return () => {
-      // Clean up when component unmounts
-      document.documentElement.classList.remove('use-dyslexic-font');
+      // Clean up if not applying globally
+      if (!applyGlobally && useDyslexicFont) {
+        document.documentElement.classList.remove('use-dyslexic-font');
+      }
     }
-  }, [useDyslexicFont]);
+  }, [useDyslexicFont, saveToLocalStorage, applyGlobally]);
   
   return { useDyslexicFont, setUseDyslexicFont };
 };

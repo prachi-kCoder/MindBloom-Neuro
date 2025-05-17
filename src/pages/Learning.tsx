@@ -4,7 +4,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Book, Book as BookIcon, GamepadIcon, BookOpen, BookText, Star, GraduationCap, Brain } from 'lucide-react';
+import { Book, Book as BookIcon, GamepadIcon, BookOpen, BookText, Star, GraduationCap, Brain, FileText } from 'lucide-react';
 import LearningIntroduction from '@/components/learning/LearningIntroduction';
 import useDyslexiaFont from '@/hooks/useDyslexiaFont';
 
@@ -223,6 +223,16 @@ const Learning = () => {
     setUseDyslexicFont(!useDyslexicFont);
   };
 
+  const goToMaterials = () => {
+    navigate('/learning/materials', { 
+      state: { 
+        disabilityType: selectedDisability,
+        ageGroup: selectedAgeGroup,
+        showIntro: false 
+      } 
+    });
+  };
+
   return (
     <MainLayout>
       <div className="container px-4 py-8 md:py-12">
@@ -265,6 +275,20 @@ const Learning = () => {
                   </TabsList>
                 </div>
                 
+                {/* Add Educational Materials Button */}
+                <div className="flex justify-center mb-6">
+                  <Button 
+                    onClick={goToMaterials} 
+                    variant="outline" 
+                    className="w-full max-w-lg flex items-center gap-2"
+                  >
+                    <FileText className="h-4 w-4" />
+                    <span className={`${useDyslexicFont ? 'font-dyslexic' : ''}`}>
+                      Upload Educational Materials
+                    </span>
+                  </Button>
+                </div>
+                
                 <TabsContent value="all" className="space-y-8">
                   {filteredAgeGroups.map((group) => (
                     <AgeGroupSection 
@@ -273,6 +297,7 @@ const Learning = () => {
                       specialActivities={getSpecializedActivities(group.id)}
                       disabilityType={selectedDisability}
                       useDyslexicFont={useDyslexicFont}
+                      onMaterialsClick={goToMaterials}
                     />
                   ))}
                 </TabsContent>
@@ -286,6 +311,7 @@ const Learning = () => {
                       specialActivities={getSpecializedActivities(group.id)}
                       disabilityType={selectedDisability}
                       useDyslexicFont={useDyslexicFont}
+                      onMaterialsClick={goToMaterials}
                     />
                   ))}
                 </TabsContent>
@@ -299,6 +325,7 @@ const Learning = () => {
                       specialActivities={getSpecializedActivities(group.id)}
                       disabilityType={selectedDisability}
                       useDyslexicFont={useDyslexicFont}
+                      onMaterialsClick={goToMaterials}
                     />
                   ))}
                 </TabsContent>
@@ -317,6 +344,7 @@ interface AgeGroupSectionProps {
   specialActivities?: any[];
   disabilityType?: string;
   useDyslexicFont?: boolean;
+  onMaterialsClick?: () => void;
 }
 
 const AgeGroupSection = ({ 
@@ -324,7 +352,8 @@ const AgeGroupSection = ({
   filterType, 
   specialActivities = [],
   disabilityType = '',
-  useDyslexicFont = false
+  useDyslexicFont = false,
+  onMaterialsClick
 }: AgeGroupSectionProps) => {
   // Combine regular activities with special activities for this disability type
   let allActivities = [...group.activities, ...specialActivities];
@@ -352,7 +381,7 @@ const AgeGroupSection = ({
   
   return (
     <section className="py-6" id={`age-${group.id}`}>
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-4">
         <div className={`p-2 rounded-lg ${group.color}`}>
           {group.icon}
         </div>
@@ -362,7 +391,21 @@ const AgeGroupSection = ({
         </div>
       </div>
       
-      <p className={`mb-6 text-muted-foreground max-w-3xl ${useDyslexicFont ? 'font-dyslexic' : ''}`}>{group.description}</p>
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <p className={`text-muted-foreground max-w-3xl ${useDyslexicFont ? 'font-dyslexic' : ''}`}>{group.description}</p>
+        
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={onMaterialsClick}
+          className="flex items-center gap-2"
+        >
+          <FileText className="h-4 w-4" />
+          <span className={useDyslexicFont ? 'font-dyslexic' : ''}>
+            Learn with Your Materials
+          </span>
+        </Button>
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {activities.map((activity) => (
