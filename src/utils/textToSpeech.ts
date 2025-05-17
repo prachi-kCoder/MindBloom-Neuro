@@ -1,7 +1,7 @@
 
 // TextToSpeech utility for accessibility
 let speech: SpeechSynthesisUtterance | null = null;
-let isSpeaking = false;
+let _isSpeaking = false; // Using underscore to avoid naming conflicts
 
 // Check if speech synthesis is available
 const isSpeechAvailable = (): boolean => {
@@ -12,13 +12,13 @@ const isSpeechAvailable = (): boolean => {
 export const stopSpeaking = (): void => {
   if (isSpeechAvailable()) {
     window.speechSynthesis.cancel();
-    isSpeaking = false;
+    _isSpeaking = false;
   }
 };
 
 // Check if speaking is active
-export const checkIsSpeaking = (): boolean => {
-  return isSpeaking;
+export const isSpeaking = (): boolean => {
+  return _isSpeaking;
 };
 
 // Interface for speech options
@@ -105,12 +105,12 @@ export function speak(
     
     if (options.onEnd) {
       speech.onend = () => {
-        isSpeaking = false;
+        _isSpeaking = false;
         if (options.onEnd) options.onEnd();
       };
     } else {
       speech.onend = () => {
-        isSpeaking = false;
+        _isSpeaking = false;
       };
     }
     
@@ -120,9 +120,9 @@ export function speak(
     
     // Actually speak the text
     window.speechSynthesis.speak(speech);
-    isSpeaking = true;
+    _isSpeaking = true;
   } catch (error) {
-    isSpeaking = false;
+    _isSpeaking = false;
     console.error("Error using speech synthesis:", error);
   }
 };
@@ -140,11 +140,6 @@ export const initVoices = (): void => {
       };
     }
   }
-};
-
-// Export isSpeaking status check
-export const isSpeaking = (): boolean => {
-  return checkIsSpeaking();
 };
 
 // Initialize on import
