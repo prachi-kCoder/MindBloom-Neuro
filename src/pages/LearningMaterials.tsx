@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -7,9 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Slider } from '@/components/ui/slider';
-import { ArrowLeft, FileText, Upload, Eye, Headphones, Volume2, VolumeX } from 'lucide-react';
+import { ArrowLeft, FileText, Upload, Eye, Headphones, Volume2, VolumeX, Calculator } from 'lucide-react';
 import useDyslexiaFont from '@/hooks/useDyslexiaFont';
-import { speak, stopSpeaking } from '@/utils/textToSpeech';
+import { speak, stopSpeaking, isSpeaking } from '@/utils/textToSpeech';
+import MathGames from '@/components/learning/math/MathGames';
 
 const LearningMaterials = () => {
   const navigate = useNavigate();
@@ -50,6 +52,9 @@ const LearningMaterials = () => {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
   
+  // Tab state
+  const [activeTab, setActiveTab] = useState("upload");
+  
   // Effect to split text into segments when text changes
   useEffect(() => {
     if (processedText) {
@@ -73,6 +78,17 @@ const LearningMaterials = () => {
   useEffect(() => {
     return () => {
       stopSpeaking();
+    };
+  }, []);
+  
+  // Effect to update isPlaying state based on speech status
+  useEffect(() => {
+    const checkSpeechStatus = setInterval(() => {
+      setIsPlaying(isSpeaking());
+    }, 500);
+    
+    return () => {
+      clearInterval(checkSpeechStatus);
     };
   }, []);
   
@@ -124,6 +140,7 @@ const LearningMaterials = () => {
       }
       
       setProcessedText(extractedText);
+      setActiveTab("learn");
       
     } catch (error) {
       console.error("Error processing file:", error);
@@ -252,20 +269,17 @@ This interactive approach helps children with dyslexia, ADHD, and ASD better und
     speak(currentText, {
       rate,
       pitch,
-      volume
+      volume,
+      onStart: () => setIsPlaying(true),
+      onEnd: () => {
+        setIsPlaying(false);
+        setShowQuestion(true);
+      },
+      onError: (e) => {
+        console.error("Speech synthesis error:", e);
+        setIsPlaying(false);
+      }
     });
-    
-    setIsPlaying(true);
-    
-    // Set timeout to show question after speech ends
-    // In a real app, we'd use the onend event of SpeechSynthesisUtterance
-    const wordCount = currentText.split(' ').length;
-    const estimatedDuration = (wordCount * 60) / (rate * 150); // Rough estimate in seconds
-    
-    setTimeout(() => {
-      setIsPlaying(false);
-      setShowQuestion(true);
-    }, estimatedDuration * 1000);
   };
   
   const handleNextSegment = () => {
@@ -357,13 +371,16 @@ This interactive approach helps children with dyslexia, ADHD, and ASD better und
           </div>
         </div>
         
-        <Tabs defaultValue="upload" className="w-full">
-          <TabsList className="grid grid-cols-2 md:grid-cols-2 w-full max-w-md mb-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid grid-cols-3 md:grid-cols-3 w-full max-w-md mb-8">
             <TabsTrigger value="upload" className={useDyslexicFont ? 'font-dyslexic' : ''}>
               Upload Material
             </TabsTrigger>
             <TabsTrigger value="learn" className={useDyslexicFont ? 'font-dyslexic' : ''}>
               Learn & Listen
+            </TabsTrigger>
+            <TabsTrigger value="math" className={useDyslexicFont ? 'font-dyslexic' : ''}>
+              Math Games
             </TabsTrigger>
           </TabsList>
           
@@ -631,6 +648,22 @@ This interactive approach helps children with dyslexia, ADHD, and ASD better und
                     )}
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="math" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calculator className="h-5 w-5" />
+                  <span className={useDyslexicFont ? 'font-dyslexic' : ''}>
+                    Interactive Math Games
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <MathGames ageGroup={ageGroup} />
               </CardContent>
             </Card>
           </TabsContent>

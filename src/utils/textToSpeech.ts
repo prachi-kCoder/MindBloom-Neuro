@@ -10,17 +10,23 @@ let voices: SpeechSynthesisVoice[] = [];
 let currentUtterance: SpeechSynthesisUtterance | null = null;
 
 // Initialize speech synthesis
-const initSpeech = () => {
+const initSpeech = (): boolean => {
   if (typeof window !== 'undefined' && window.speechSynthesis) {
     speechSynthesis = window.speechSynthesis;
-    voices = speechSynthesis.getVoices();
     
-    // If voices aren't loaded yet, wait for them
-    if (voices.length === 0) {
-      speechSynthesis.onvoiceschanged = () => {
-        voices = speechSynthesis.getVoices();
-      };
+    // Get voices - this is important for browser compatibility
+    const loadVoices = () => {
+      voices = speechSynthesis.getVoices();
+      console.log("Loaded voices:", voices.length);
+    };
+    
+    // Some browsers need the onvoiceschanged event
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+      speechSynthesis.onvoiceschanged = loadVoices;
     }
+    
+    // Load voices immediately as well (for browsers that don't fire the event)
+    loadVoices();
     
     return true;
   }
@@ -61,7 +67,7 @@ export const speak = (text: string, options: SpeechOptions = {}): SpeechSynthesi
     if (!initSpeech()) return null;
   }
   
-  // If there's an utterance already in progress, pause it
+  // If there's an utterance already in progress, cancel it
   if (currentUtterance && speechSynthesis?.speaking) {
     speechSynthesis.cancel();
   }
@@ -81,13 +87,18 @@ export const speak = (text: string, options: SpeechOptions = {}): SpeechSynthesi
   if (options.onPause) utterance.onpause = options.onPause;
   if (options.onResume) utterance.onresume = options.onResume;
   
+  // Get available voices (in case they weren't loaded initially)
+  if (voices.length === 0) {
+    voices = speechSynthesis.getVoices();
+  }
+  
   // Try to find a specified voice
-  if (options.voiceURI) {
+  if (options.voiceURI && voices.length > 0) {
     const requestedVoice = voices.find(voice => voice.voiceURI === options.voiceURI);
     if (requestedVoice) {
       utterance.voice = requestedVoice;
     }
-  } else {
+  } else if (voices.length > 0) {
     // Try to find a more natural sounding voice
     const preferredVoice = voices.find(voice => 
       voice.name.includes('Daniel') || 
@@ -101,10 +112,24 @@ export const speak = (text: string, options: SpeechOptions = {}): SpeechSynthesi
     }
   }
   
+  // Log for debugging
+  console.log('Speaking text:', text.substring(0, 50) + (text.length > 50 ? '...' : ''));
+  console.log('Using voice:', utterance.voice?.name || 'Default');
+  console.log('Rate:', utterance.rate, 'Pitch:', utterance.pitch, 'Volume:', utterance.volume);
+  
   // Save reference to current utterance
   currentUtterance = utterance;
   
-  speechSynthesis.speak(utterance);
+  // Fix for Chrome issue where utterances aren't spoken after a while
+  if (speechSynthesis.speaking) {
+    speechSynthesis.cancel();
+    setTimeout(() => {
+      speechSynthesis.speak(utterance);
+    }, 50);
+  } else {
+    speechSynthesis.speak(utterance);
+  }
+  
   return utterance;
 };
 
