@@ -1,6 +1,7 @@
 
 // TextToSpeech utility for accessibility
 let speech: SpeechSynthesisUtterance | null = null;
+let isSpeaking = false;
 
 // Check if speech synthesis is available
 const isSpeechAvailable = (): boolean => {
@@ -11,11 +12,35 @@ const isSpeechAvailable = (): boolean => {
 export const stopSpeaking = (): void => {
   if (isSpeechAvailable()) {
     window.speechSynthesis.cancel();
+    isSpeaking = false;
   }
 };
 
+// Check if speaking is active
+export const checkIsSpeaking = (): boolean => {
+  return isSpeaking;
+};
+
+// Interface for speech options
+interface SpeechOptions {
+  rate?: number;
+  pitch?: number;
+  volume?: number;
+  onStart?: () => void;
+  onEnd?: () => void;
+  onError?: (error: any) => void;
+}
+
 // Speak text with configurable options
-export const speak = (text: string, rate: number = 1.0, pitch: number = 1.0, volume: number = 1.0): void => {
+export function speak(text: string): void;
+export function speak(text: string, rate: number, pitch?: number, volume?: number): void;
+export function speak(text: string, options: SpeechOptions): void;
+export function speak(
+  text: string, 
+  rateOrOptions?: number | SpeechOptions, 
+  pitch?: number, 
+  volume?: number
+): void {
   if (!isSpeechAvailable()) {
     console.warn("Speech synthesis is not available in this browser");
     return;
@@ -27,10 +52,25 @@ export const speak = (text: string, rate: number = 1.0, pitch: number = 1.0, vol
   // Create a new utterance if one doesn't exist or reuse existing
   speech = new SpeechSynthesisUtterance(text);
   
+  let options: SpeechOptions = {};
+  
+  // Handle different parameter formats
+  if (typeof rateOrOptions === 'number') {
+    // Legacy format: speak(text, rate, pitch, volume)
+    options = {
+      rate: rateOrOptions,
+      pitch: pitch ?? 1.0,
+      volume: volume ?? 1.0
+    };
+  } else if (rateOrOptions && typeof rateOrOptions === 'object') {
+    // New format: speak(text, options)
+    options = rateOrOptions;
+  }
+  
   // Configure speech settings
-  speech.rate = rate; // Speed: 0.1 to 10
-  speech.pitch = pitch; // Pitch: 0 to 2
-  speech.volume = volume; // Volume: 0 to 1
+  speech.rate = options.rate ?? 1.0; // Speed: 0.1 to 10
+  speech.pitch = options.pitch ?? 1.0; // Pitch: 0 to 2
+  speech.volume = options.volume ?? 1.0; // Volume: 0 to 1
   
   try {
     // For better voice quality, try to get a female voice (often better for children)
@@ -58,9 +98,31 @@ export const speak = (text: string, rate: number = 1.0, pitch: number = 1.0, vol
       }
     }
     
+    // Set up event handlers if provided
+    if (options.onStart) {
+      speech.onstart = options.onStart;
+    }
+    
+    if (options.onEnd) {
+      speech.onend = () => {
+        isSpeaking = false;
+        if (options.onEnd) options.onEnd();
+      };
+    } else {
+      speech.onend = () => {
+        isSpeaking = false;
+      };
+    }
+    
+    if (options.onError) {
+      speech.onerror = options.onError;
+    }
+    
     // Actually speak the text
     window.speechSynthesis.speak(speech);
+    isSpeaking = true;
   } catch (error) {
+    isSpeaking = false;
     console.error("Error using speech synthesis:", error);
   }
 };
@@ -78,6 +140,11 @@ export const initVoices = (): void => {
       };
     }
   }
+};
+
+// Export isSpeaking status check
+export const isSpeaking = (): boolean => {
+  return checkIsSpeaking();
 };
 
 // Initialize on import
