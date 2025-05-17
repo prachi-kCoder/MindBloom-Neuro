@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -447,7 +446,12 @@ This interactive approach helps children with dyslexia, ADHD, and ASD better und
                     </p>
                     <Button 
                       variant="outline"
-                      onClick={() => document.querySelector('[data-state="inactive"][data-value="upload"]')?.click()}
+                      onClick={() => {
+                        const uploadTabTrigger = document.querySelector('[data-state="inactive"][data-value="upload"]') as HTMLButtonElement;
+                        if (uploadTabTrigger) {
+                          uploadTabTrigger.click();
+                        }
+                      }}
                     >
                       Go to Upload
                     </Button>
