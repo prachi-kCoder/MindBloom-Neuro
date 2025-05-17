@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -315,11 +314,7 @@ const FunctionMachine: React.FC<FunctionMachineProps> = ({
       setMachineState('idle');
       
       // Speak the result
-      speak({
-        text: `Input: ${input}, Output: ${output.toFixed(2)}`,
-        pitch: 1.2,
-        rate: 1.0
-      });
+      speak(`Input: ${input}, Output: ${output.toFixed(2)}`);
     }, 800);
   };
   
@@ -332,10 +327,7 @@ const FunctionMachine: React.FC<FunctionMachineProps> = ({
       if (userGuess.trim().toLowerCase() === currentRule.display.toLowerCase()) {
         handleCorrectAnswer();
       } else {
-        speak({
-          text: "Not quite right. Try again! Watch what happens with different inputs.",
-          pitch: 1.1
-        });
+        speak("Not quite right. Try again! Watch what happens with different inputs.");
         toast("Let's try some more inputs to figure this out", {
           description: "The pattern is there! You're getting closer.",
           icon: "🔍"
@@ -362,10 +354,7 @@ const FunctionMachine: React.FC<FunctionMachineProps> = ({
       if (isCorrect) {
         handleCorrectAnswer();
       } else {
-        speak({
-          text: `Your input ${userInput} gives output ${calculatedOutput.toFixed(2)}, but we need ${targetOutput}. Let's try a different input!`,
-          pitch: 1.1
-        });
+        speak(`Your input ${userInput} gives output ${calculatedOutput.toFixed(2)}, but we need ${targetOutput}. Let's try a different input!`);
         toast("Not the right input, but that's okay!", {
           description: `Input ${userInput} gives output ${calculatedOutput.toFixed(2)}`,
           icon: "🔄"
@@ -379,11 +368,7 @@ const FunctionMachine: React.FC<FunctionMachineProps> = ({
     setMachineState('success');
     playCalculationSound('success');
     
-    speak({
-      text: "That's correct! Great job figuring out the function rule!",
-      pitch: 1.3,
-      rate: 1.1
-    });
+    speak("That's correct! Great job figuring out the function rule!");
     setScore(score + 1);
     setShowSuccess(true);
     toast.success("That's correct! Well done!", {
@@ -403,17 +388,9 @@ const FunctionMachine: React.FC<FunctionMachineProps> = ({
   
   const speakInstructions = () => {
     if (mode === 'guessRule') {
-      speak({
-        text: "Look at the input-output examples and try to figure out the function rule. For example, if input 1 gives output 3, and input 2 gives output 5, the rule might be 'x + 2'. Try different inputs to see the pattern.",
-        rate: 0.9,
-        pitch: 1.1
-      });
+      speak("Look at the input-output examples and try to figure out the function rule. For example, if input 1 gives output 3, and input 2 gives output 5, the rule might be 'x + 2'. Try different inputs to see the pattern.");
     } else {
-      speak({
-        text: `Find the input value that gives an output of ${targetOutput}. Try different inputs to see what happens.`,
-        rate: 0.9,
-        pitch: 1.1
-      });
+      speak(`Find the input value that gives an output of ${targetOutput}. Try different inputs to see what happens.`);
     }
   };
   
@@ -796,7 +773,7 @@ const FunctionMachine: React.FC<FunctionMachineProps> = ({
       </div>
       
       {/* CSS for machine shake animation */}
-      <style jsx>{`
+      <style>{`
         @keyframes shake {
           0% { transform: translateX(0); }
           25% { transform: translateX(-5px) rotate(-1deg); }
