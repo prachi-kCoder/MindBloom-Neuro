@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Book, Book as BookIcon, GamepadIcon, BookOpen, BookText, Star, GraduationCap, Brain, FileText } from 'lucide-react';
+import { Book, Book as BookIcon, GamepadIcon, BookOpen, BookText, Star, GraduationCap, Brain, FileText, Calculator } from 'lucide-react';
 import LearningIntroduction from '@/components/learning/LearningIntroduction';
 import useDyslexiaFont from '@/hooks/useDyslexiaFont';
 
@@ -165,6 +166,25 @@ const SPECIALIZED_ACTIVITIES = {
   ]
 };
 
+// Math games for each age group
+const MATH_GAMES = {
+  "6-8": [
+    { id: "fraction-feast", name: "Fraction Feast", description: "Help animals share food equally by dividing into parts", icon: "🍕", type: "game" },
+    { id: "colorful-fractions", name: "Colorful Fractions", description: "Fill in shapes with the right number of parts", icon: "🎨", type: "game" },
+    { id: "balloon-pop", name: "Balloon Pop Fractions", description: "Pop balloons with the correct fraction", icon: "🎈", type: "game" },
+  ],
+  "8-10": [
+    { id: "fraction-galaxy", name: "Fraction Galaxy Mission", description: "Collect equivalent fractions to power your spaceship", icon: "🚀", type: "game" },
+    { id: "pizza-puzzle", name: "Pizza Puzzle Mania", description: "Complete pizzas by combining fraction toppings", icon: "🍕", type: "game" },
+    { id: "fraction-fair", name: "Fraction Fair", description: "Visualize fractions with bar graphs and pie charts", icon: "📊", type: "game" },
+  ],
+  "10-12": [
+    { id: "function-machine", name: "Function Machine Lab", description: "Discover function rules by analyzing inputs and outputs", icon: "🧮", type: "game" },
+    { id: "fraction-trail", name: "Fraction Trail Quest", description: "Navigate terrain by solving complex fraction problems", icon: "🏞️", type: "game" },
+    { id: "graph-crafter", name: "Graph Crafter", description: "Build and interpret function graphs", icon: "📈", type: "game" },
+  ]
+};
+
 const Learning = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -212,10 +232,16 @@ const Learning = () => {
       .filter(activity => activity.ageGroups.includes(ageGroupId));
   };
   
-  // Combine regular and specialized activities
+  // Get math games for the specific age group
+  const getMathGamesForAgeGroup = (ageGroupId: string) => {
+    return MATH_GAMES[ageGroupId as keyof typeof MATH_GAMES] || [];
+  };
+  
+  // Combine regular, specialized activities and math games
   const getCombinedActivities = (ageGroup: typeof AGE_GROUPS[0]) => {
     const specializedActivities = getSpecializedActivities(ageGroup.id);
-    return [...ageGroup.activities, ...specializedActivities];
+    const mathGames = getMathGamesForAgeGroup(ageGroup.id);
+    return [...ageGroup.activities, ...specializedActivities, ...mathGames];
   };
   
   // Toggle dyslexia font
@@ -268,10 +294,16 @@ const Learning = () => {
             <div className="mb-8">
               <Tabs defaultValue="all" className="w-full">
                 <div className="flex justify-center mb-6">
-                  <TabsList className="grid grid-cols-2 md:grid-cols-3 w-full max-w-lg">
+                  <TabsList className="grid grid-cols-3 md:grid-cols-4 w-full max-w-xl">
                     <TabsTrigger value="all" className={useDyslexicFont ? 'font-dyslexic' : ''}>All Activities</TabsTrigger>
                     <TabsTrigger value="games" className={useDyslexicFont ? 'font-dyslexic' : ''}>Games</TabsTrigger>
                     <TabsTrigger value="activities" className={useDyslexicFont ? 'font-dyslexic' : ''}>Learning Activities</TabsTrigger>
+                    <TabsTrigger value="math" className={useDyslexicFont ? 'font-dyslexic' : ''}>
+                      <div className="flex items-center gap-1">
+                        <Calculator size={16} />
+                        <span>Math Games</span>
+                      </div>
+                    </TabsTrigger>
                   </TabsList>
                 </div>
                 
@@ -295,6 +327,7 @@ const Learning = () => {
                       key={group.id} 
                       group={group} 
                       specialActivities={getSpecializedActivities(group.id)}
+                      mathGames={getMathGamesForAgeGroup(group.id)}
                       disabilityType={selectedDisability}
                       useDyslexicFont={useDyslexicFont}
                       onMaterialsClick={goToMaterials}
@@ -309,6 +342,7 @@ const Learning = () => {
                       group={group} 
                       filterType="game"
                       specialActivities={getSpecializedActivities(group.id)}
+                      mathGames={getMathGamesForAgeGroup(group.id)}
                       disabilityType={selectedDisability}
                       useDyslexicFont={useDyslexicFont}
                       onMaterialsClick={goToMaterials}
@@ -323,6 +357,21 @@ const Learning = () => {
                       group={group} 
                       filterType="activity"
                       specialActivities={getSpecializedActivities(group.id)}
+                      mathGames={getMathGamesForAgeGroup(group.id)}
+                      disabilityType={selectedDisability}
+                      useDyslexicFont={useDyslexicFont}
+                      onMaterialsClick={goToMaterials}
+                    />
+                  ))}
+                </TabsContent>
+
+                <TabsContent value="math" className="space-y-8">
+                  {filteredAgeGroups.map((group) => (
+                    <AgeGroupSection 
+                      key={group.id} 
+                      group={group} 
+                      showMathOnly={true}
+                      mathGames={getMathGamesForAgeGroup(group.id)}
                       disabilityType={selectedDisability}
                       useDyslexicFont={useDyslexicFont}
                       onMaterialsClick={goToMaterials}
@@ -342,8 +391,10 @@ interface AgeGroupSectionProps {
   group: typeof AGE_GROUPS[0];
   filterType?: string;
   specialActivities?: any[];
+  mathGames?: any[];
   disabilityType?: string;
   useDyslexicFont?: boolean;
+  showMathOnly?: boolean;
   onMaterialsClick?: () => void;
 }
 
@@ -351,12 +402,16 @@ const AgeGroupSection = ({
   group, 
   filterType, 
   specialActivities = [],
+  mathGames = [],
   disabilityType = '',
   useDyslexicFont = false,
+  showMathOnly = false,
   onMaterialsClick
 }: AgeGroupSectionProps) => {
-  // Combine regular activities with special activities for this disability type
-  let allActivities = [...group.activities, ...specialActivities];
+  // If showing math only, just use math games
+  let allActivities = showMathOnly 
+    ? [...mathGames]
+    : [...group.activities, ...specialActivities, ...mathGames];
   
   // Apply type filter if specified
   const activities = filterType 
@@ -378,6 +433,12 @@ const AgeGroupSection = ({
         return null;
     }
   };
+
+  // Check if this is a math game
+  const isMathGame = (activityId: string) => {
+    return ['fraction-feast', 'fraction-galaxy', 'function-machine', 'colorful-fractions', 
+            'balloon-pop', 'pizza-puzzle', 'fraction-fair', 'fraction-trail', 'graph-crafter'].includes(activityId);
+  };
   
   return (
     <section className="py-6" id={`age-${group.id}`}>
@@ -394,37 +455,47 @@ const AgeGroupSection = ({
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <p className={`text-muted-foreground max-w-3xl ${useDyslexicFont ? 'font-dyslexic' : ''}`}>{group.description}</p>
         
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={onMaterialsClick}
-          className="flex items-center gap-2"
-        >
-          <FileText className="h-4 w-4" />
-          <span className={useDyslexicFont ? 'font-dyslexic' : ''}>
-            Learn with Your Materials
-          </span>
-        </Button>
+        {!showMathOnly && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={onMaterialsClick}
+            className="flex items-center gap-2"
+          >
+            <FileText className="h-4 w-4" />
+            <span className={useDyslexicFont ? 'font-dyslexic' : ''}>
+              Learn with Your Materials
+            </span>
+          </Button>
+        )}
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {activities.map((activity) => (
-          <Card key={activity.id} className="overflow-hidden transition-all duration-200 hover:shadow-md">
-            <CardHeader className={`${group.color} bg-opacity-30 pb-4`}>
+          <Card 
+            key={activity.id} 
+            className="overflow-hidden transition-all duration-200 hover:shadow-md bg-white/90 border border-gray-100"
+          >
+            <CardHeader className={`${isMathGame(activity.id) ? 'bg-soft-blue/30' : group.color} bg-opacity-30 pb-4`}>
               <div className="flex justify-between items-center">
                 <CardTitle className={`text-xl flex items-center gap-2 ${useDyslexicFont ? 'font-dyslexic' : ''}`}>
                   <span className="text-2xl">{activity.icon}</span>
                   {activity.name}
                 </CardTitle>
-                <div className="px-2 py-1 text-xs rounded-full bg-background flex items-center gap-1">
-                  {activity.type === 'game' ? 'Game' : 'Activity'}
+                <div className="px-2 py-1 text-xs rounded-full bg-background/80 flex items-center gap-1">
+                  {isMathGame(activity.id) ? 'Math Game' : activity.type === 'game' ? 'Game' : 'Activity'}
                   {specialActivities.includes(activity) && getDisabilityIcon()}
                 </div>
               </div>
+              {activity.description && (
+                <CardDescription className={`mt-2 ${useDyslexicFont ? 'font-dyslexic' : ''}`}>
+                  {activity.description}
+                </CardDescription>
+              )}
             </CardHeader>
-            <CardContent className="pt-4">
+            <CardContent className="pt-4 bg-gradient-to-b from-transparent to-gray-50/30">
               <div className="flex justify-end">
-                <Button asChild>
+                <Button asChild className="bg-primary/90 hover:bg-primary shadow-sm">
                   <Link 
                     to={`/learning/${group.id}/${activity.id}`}
                     state={{ disabilityType: disabilityType }}
