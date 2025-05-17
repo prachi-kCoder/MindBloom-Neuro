@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -6,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { speak, stopSpeaking } from '@/utils/textToSpeech';
 import useDyslexiaFont from '@/hooks/useDyslexiaFont';
 import { toast } from 'sonner';
-import { Volume2, ChevronRight, Lightbulb, Star, Divide, Plus, Minus, Equal, SquareRoot } from 'lucide-react';
+import { Volume2, ChevronRight, Lightbulb, Star, Divide, Plus, Minus, Equal } from 'lucide-react';
 
 interface FunctionMachineProps {
   level?: number;
@@ -269,7 +268,7 @@ const FunctionMachine: React.FC<FunctionMachineProps> = ({
                   {showHint && mode === 'guessRule' ? currentRule?.display : "f(x) = ?"}
                 </div>
                 <div className="flex items-center justify-center gap-2 mt-2">
-                  {[Plus, Minus, Divide, Equal, SquareRoot].map((Icon, i) => (
+                  {[Plus, Minus, Divide, Equal].map((Icon, i) => (
                     <Icon key={i} className="h-5 w-5 text-gray-400" />
                   ))}
                 </div>
