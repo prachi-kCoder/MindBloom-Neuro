@@ -1,3 +1,4 @@
+
 import React, { useRef, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -5,8 +6,9 @@ import { Toggle } from '@/components/ui/toggle';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { speak } from '@/utils/textToSpeech';
-import { Circle, Save, Download, Paintbrush, FileIcon, Eraser } from 'lucide-react';
+import { speak, stopSpeaking } from '@/utils/textToSpeech';
+import { Circle, Save, Download, Paintbrush, Eraser } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface ColoringActivityProps {
   onProgress: (progress: number) => void;
@@ -20,10 +22,11 @@ const COLORING_TEMPLATES = [
   {
     id: 'apple',
     name: 'Apple',
-    image: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjUwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxwYXRoIGQ9Ik0yNTAgMTAwYzAtMzMuMzMzIDI1LTU4LjMzMyA3NS03NWwxMCAyMGMtNDEuNjY3IDEwLTYzLjMzMyAzMC02NSA2MHY0MGMzNi42NjctMzMuMzMzIDc4LjMzMy01MCAxMjUtNTAgNTAgMCA5MS42NjcgMjUgMTI1IDc1IDE2LjY2NyA0MS42NjcgMTYuNjY3IDgzLjMzMyAwIDEyNS04LjMzMyAxNi42NjctMzAgMzUuMTY3LTY1IDU1LjVzLTYyLjUgMzAuNS03NS4yIDMwLjVjLTguMiAwLTI5LjgtNy4xNjctNjQuOC0yMS41UzI2MCAzMzUgMjYwIDMzNXMtNDAuMzMzIDE0LjE2Ny03NS4zMzMgMjguNVMxMzMuMzMzIDM4NSAxMjUgMzg1Yy0xMi41IDAtNDAuMjMzLTEwLjE2Ny03NS43LTMwLVTMjUgMzE2LjY2NyAxNiAzMDBjLTE2LjY2Ny00MS42NjctMTYuNjY3LTgzLjMzMyAwLTEyNSAzMy4zMzMtNTAgNzUtNzUgMTI1LTc1IDQ2LjY2NyAwIDg4LjMzMyAxNi42NjcgMTI1IDUwdi00MGMtMS44MzMtMzAtMjMuNS01MC02NS02MGwxMC0yMGM1MCAxNi42NjcgNzUgNDEuNjY3IDc1IDc1djYxbC0xMCAxMGEyMTYuNjI3IDIxNi42MjcgMCAwMC01MCAxNGMtMTYuNjY3IDYuNjY3LTMzLjMzMyAxNy41LTUwIDMyLjVTMTgzLjMzMyAzNTAgMTc1IDM1MGMtOC4zMzMgMC0yNS0xMC44MzMtNTAtMzIuNXMtMzMuMzMzLTI1LjgzMy01MC0zMi41YTE4MCAxODAgMCAwMC01MC0xNGwtMTAtMTB2LTYxWiIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPg==',
+    image: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjUwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxwYXRoIGQ9Ik0yNTAgMTAwYzAtMzMuMzMzIDI1LTU4LjMzMyA3NS03NWwxMCAyMGMtNDEuNjY3IDEwLTYzLjMzMyAzMC02NSA2MHY0MGMzNi42NjctMzMuMzMzIDc4LjMzMy01MCAxMjUtNTAgNTAgMCA5MS42NjcgMjUgMTI1IDc1IDE2LjY2NyA0MS42NjcgMTYuNjY3IDgzLjMzMyAwIDEyNS04LjMzMyAxNi42NjctMzAgMzUuMTY3LTY1IDU1LjVzLTYyLjUgMzAuNS03NS4yIDMwLjVjLTguMiAwLTI5LjgtNy4xNjctNjQuOC0yMS41UzI2MCAzMzUgMjYwIDMzNXMtNDAuMzMzIDE0LjE2Ny03NS4zMzMgMjguNVMxMzMuMzMzIDM4NSAxMjUgMzg1Yy0xMi41IDAtNDAuMjMzLTEwLjE2Ny03NS43LTMwLjVTMjUgMzE2LjY2NyAxNiAzMDBjLTE2LjY2Ny00MS42NjctMTYuNjY3LTgzLjMzMyAwLTEyNSAzMy4zMzMtNTAgNzUtNzUgMTI1LTc1IDQ2LjY2NyAwIDg4LjMzMyAxNi42NjcgMTI1IDUwdi00MGMtMS44MzMtMzAtMjMuNS01MC02NS02MGwxMC0yMGM1MCAxNi42NjcgNzUgNDEuNjY3IDc1IDc1djYxbC0xMCAxMGEyMTYuNjI3IDIxNi42MjcgMCAwMC01MCAxNGMtMTYuNjY3IDYuNjY3LTMzLjMzMyAxNy41LTUwIDMyLjVTMTgzLjMzMyAzNTAgMTc1IDM1MGMtOC4zMzMgMC0yNS0xMC44MzMtNTAtMzIuNXMtMzMuMzMzLTI1LjgzMy01MC0zMi41YTE4MCAxODAgMCAwMC01MC0xNGwtMTAtMTB2LTYxWiIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPg==',
     labelPosition: { x: 250, y: 50 },
     funFact: "Apples are a great source of fiber and vitamin C!",
-    suggestedColors: ['#FF5555', '#FF0000', '#8B0000', '#006400', '#228B22']
+    suggestedColors: ['#FF5555', '#FF0000', '#8B0000', '#006400', '#228B22'],
+    parentPrompt: "Ask your child: Can you find something else that's red like an apple?"
   },
   {
     id: 'butterfly',
@@ -31,7 +34,8 @@ const COLORING_TEMPLATES = [
     image: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjUwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxwYXRoIGQ9Ik0yNTAgMTAwYzMzLjMzMy0zMy4zMzMgNzAtNDUgMTEwLTM1IDQwIDEwIDYwIDM3LjUgNjAgODIuNSAwIDQ1LTE4LjMzMyA4MC44MzMtNTUgMTA3LjVzLTczLjMzMyAzNS44MzMtMTEwIDMyLjVjMzYuNjY3IDMuMzMzIDczLjMzMyA1LjgzMyAxMTAgMzIuNXM1NSA2Mi41IDU1IDEwNy41YzAgNDUtMjAgNzIuNS02MCA4Mi41LTQwIDEwLTc2LjY2Ny0xLjY2Ny0xMTAtMzUtMzMuMzMzIDMzLjMzMy03MCA0NS0xMTAgMzUtNDAtMTAtNjAtMzcuNS02MC04Mi41IDAtNDUgMTguMzMzLTgwLjgzMyA1NS0xMDcuNXM3My4zMzMtMjkuMTY3IDExMC0zMi41Yy0zNi42NjctMy4zMzMtNzMuMzMzLTUuODMzLTExMC0zMi41Uzk1IDE5Mi41IDk1IDE0Ny41YzAtNDUgMjAtNzIuNSA2MC04Mi41IDQwLTEwIDc2LjY2NyAxLjY2NyAxMTAgMzVaIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjIiIGZpbGw9Im5vbmUiLz4KICAgIDxjaXJjbGUgY3g9IjI1MCIgY3k9IjI1MCIgcj0iMTAiIGZpbGw9ImJsYWNrIi8+CiAgICA8cGF0aCBkPSJNMjUwIDIyMGMwIDAgMjAtMzAgNDAtMzAgTTI1MCAyMjBjMCAwLTIwLTMwLTQwLTMwIE0yNTAgMjgwYzAgMCAyMCAzMCA0MCAzMCBNMjUwIDI4MGMwIDAtMjAgMzAtNDAgMzAgTTI1MCAyMjBMMjUwIDI4MCIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPg==',
     labelPosition: { x: 250, y: 50 },
     funFact: "Butterflies taste with their feet and can see colors!",
-    suggestedColors: ['#5555FF', '#FFAA55', '#FFFF55', '#FF55AA', '#AA55AA']
+    suggestedColors: ['#5555FF', '#FFAA55', '#FFFF55', '#FF55AA', '#AA55AA'],
+    parentPrompt: "Ask your child: What colors do you see on butterflies outside?"
   },
   {
     id: 'flower',
@@ -39,7 +43,8 @@ const COLORING_TEMPLATES = [
     image: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjUwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxjaXJjbGUgY3g9IjI1MCIgY3k9IjI1MCIgcj0iNTAiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIvPgogICAgPGNpcmNsZSBjeD0iMjUwIiBjeT0iMTUwIiByPSI0MCIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CiAgICA8Y2lyY2xlIGN4PSIyNTAiIGN5PSIzNTAiIHI9IjQwIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjIiIGZpbGw9Im5vbmUiLz4KICAgIDxjaXJjbGUgY3g9IjE1MCIgY3k9IjI1MCIgcj0iNDAiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIvPgogICAgPGNpcmNsZSBjeD0iMzUwIiBjeT0iMjUwIiByPSI0MCIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CiAgICA8cGF0aCBkPSJNMjUwIDMwMFYzODAiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS13aWR0aD0iNCIgLz4KPC9zdmc+',
     labelPosition: { x: 250, y: 50 },
     funFact: "Flowers help plants make seeds and attract bees for pollination!",
-    suggestedColors: ['#FF55AA', '#FFFF55', '#55AA55', '#FFAA55', '#AA55AA']
+    suggestedColors: ['#FF55AA', '#FFFF55', '#55AA55', '#FFAA55', '#AA55AA'],
+    parentPrompt: "Ask your child: What sounds do different animals make?"
   },
   {
     id: 'house',
@@ -47,15 +52,17 @@ const COLORING_TEMPLATES = [
     image: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjUwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxwYXRoIGQ9Ik0xMDAgMjUwdjE1MGgzMDB2LTE1MHoiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIvPgogICAgPHBhdGggZD0iTTUwIDI1MGwxNTAgLTEwMCBoMTAwIGwxNTAgMTAweiIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CiAgICA8cmVjdCB4PSIyMDAiIHk9IjMwMCIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIvPgogICAgPHJlY3QgeD0iMjI1IiB5PSIzMjUiIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPg==',
     labelPosition: { x: 250, y: 50 },
     funFact: "Houses keep us safe, warm and dry!",
-    suggestedColors: ['#A52A2A', '#FFA07A', '#D2B48C', '#1E90FF', '#228B22']
+    suggestedColors: ['#A52A2A', '#FFA07A', '#D2B48C', '#1E90FF', '#228B22'],
+    parentPrompt: "Ask your child: What colors are the houses in your neighborhood?"
   },
   {
     id: 'fish',
     name: 'Fish',
-    image: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjUwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxwYXRoIGQ9Ik0xMzAgMjUwYzAtMzMuMzMzIDUwLTEwOC4zMzMgMTUwLTEyNSA4My4zMzMgMCAxNTAgNDEuNjY3IDIwMCAxMjVzLTExNi42NjcgMTI1LTIwMCAxMjVjLTEwMC0xNi42NjctMTUwLTkxLjY2Ny0xNTAtMTI1eiIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiAvPgo8L3N2Zz4=',
+    image: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjUwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxwYXRoIGQ9Ik0xMzAgMjUwYzAtMzMuMzMzIDUwLTEwOC4zMzMgMTUwLTEyNSA4My4zMzMgMCAxNTAgNDEuNjY3IDIwMCAxMjVzLTExNi42NjcgMTI1LTIwMCAxMjVjLTEwMC0xNi42NjctMTUwLTkxLjY2Ny0xNTAtMTI1eiIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CiAgICA8Y2lyY2xlIGN4PSIxODAiIGN5PSIyMjAiIHI9IjE1IiBmaWxsPSJibGFjayIvPgogICAgPHBhdGggZD0iTTEyMCAyNTBsLTcwIDUwIE0xMjAgMjUwbC03MC01MCIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiAvPgo8L3N2Zz4=',
     labelPosition: { x: 250, y: 50 },
     funFact: "Fish live underwater and breathe through gills!",
-    suggestedColors: ['#5555FF', '#00FFFF', '#FF5555', '#FFFF55', '#FF55AA']
+    suggestedColors: ['#5555FF', '#00FFFF', '#FF5555', '#FFFF55', '#FF55AA'],
+    parentPrompt: "Ask your child: What colors can fish be?"
   }
 ];
 
@@ -93,6 +100,8 @@ const ColoringActivity: React.FC<ColoringActivityProps> = ({
   const [brushSize, setBrushSize] = useState(10);
   const [outlineGlowMode, setOutlineGlowMode] = useState(true);
   const [lastPosition, setLastPosition] = useState<{x: number, y: number} | null>(null);
+  const [showParentTip, setShowParentTip] = useState(false);
+  const { toast } = useToast();
   
   // Store outline data for bucket fill validation
   const outlineDataRef = useRef<ImageData | null>(null);
@@ -155,6 +164,7 @@ const ColoringActivity: React.FC<ColoringActivityProps> = ({
       // Reset coloring progress
       setColoredPixels(0);
       setColorCompletionCount({});
+      setShowParentTip(false);
     }
   };
   
@@ -171,10 +181,13 @@ const ColoringActivity: React.FC<ColoringActivityProps> = ({
     setActiveTool(tool);
     
     if (tool === 'brush') {
+      speak("Use the brush to color small areas");
       setTutorMessage("Use the brush to color small areas");
     } else if (tool === 'fill') {
+      speak("Tap inside an area to fill it with color!");
       setTutorMessage("Tap inside an area to fill it with color!");
     } else if (tool === 'eraser') {
+      speak("Use the eraser to fix mistakes");
       setTutorMessage("Use the eraser to fix mistakes");
     }
   };
@@ -226,6 +239,7 @@ const ColoringActivity: React.FC<ColoringActivityProps> = ({
       } else if (progress >= 99) {
         setTutorMessage("Wonderful job! You've finished coloring. Try another picture if you'd like!");
         speak("Wonderful job! You've finished coloring.");
+        setShowParentTip(true);
       }
     }
   };
@@ -466,12 +480,13 @@ const ColoringActivity: React.FC<ColoringActivityProps> = ({
     setShowColorHelp(!showColorHelp);
     if (!showColorHelp) {
       setTutorMessage(`Here are some colors that might look nice for the ${currentTemplate.name}!`);
+      speak(`Here are some colors that might look nice for the ${currentTemplate.name}!`);
     } else {
       setTutorMessage(`Let's color a ${currentTemplate.name}! ${currentTemplate.funFact}`);
     }
   };
   
-  // Save the current artwork to PNG
+  // Save the current artwork to PNG and localStorage
   const saveArtwork = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -485,6 +500,11 @@ const ColoringActivity: React.FC<ColoringActivityProps> = ({
         localStorage.setItem(`coloring_${currentTemplate.id}`, dataUrl);
         setTutorMessage("Your artwork has been saved! You can see it later.");
         speak("Your artwork has been saved!");
+        toast({
+          title: "Artwork saved!",
+          description: "Your masterpiece has been saved.",
+        });
+        setShowParentTip(true);
       } catch (e) {
         console.error("Error saving to localStorage:", e);
         // Continue with download as fallback
@@ -518,6 +538,22 @@ const ColoringActivity: React.FC<ColoringActivityProps> = ({
   const colorsMatch = (color1: {r: number, g: number, b: number, a: number}, color2: {r: number, g: number, b: number, a: number}) => {
     return color1.r === color2.r && color1.g === color2.g && color1.b === color2.b;
   };
+
+  // Set brush size based on age group and device
+  useEffect(() => {
+    if (ageGroup === '0-3') {
+      setBrushSize(15); // Larger for toddlers
+    } else if (ageGroup === '3-4') {
+      setBrushSize(12); 
+    } else {
+      setBrushSize(10);
+    }
+    
+    // Detect mobile and set larger brush size
+    if (/Mobi|Android/i.test(navigator.userAgent)) {
+      setBrushSize(prev => prev + 5);
+    }
+  }, [ageGroup]);
   
   return (
     <div className="flex flex-col gap-6">
@@ -568,6 +604,7 @@ const ColoringActivity: React.FC<ColoringActivityProps> = ({
                       className={`w-8 h-8 rounded-full border-2 ${selectedColor === color.value ? 'border-black' : 'border-transparent'}`}
                       style={{ backgroundColor: color.value }}
                       onClick={() => handleColorChange(color.value)}
+                      aria-label={color.name}
                     />
                   </TooltipTrigger>
                   <TooltipContent>
@@ -603,7 +640,7 @@ const ColoringActivity: React.FC<ColoringActivityProps> = ({
           <Tooltip>
             <TooltipTrigger asChild>
               <div 
-                className={`p-2 rounded border ${activeTool === 'brush' ? 'bg-muted border-black' : 'bg-white'}`}
+                className={`p-2 rounded border ${activeTool === 'brush' ? 'bg-muted border-black' : 'bg-white'} cursor-pointer`}
                 onClick={() => handleToolChange('brush')}
               >
                 <Paintbrush size={20} />
@@ -617,7 +654,7 @@ const ColoringActivity: React.FC<ColoringActivityProps> = ({
           <Tooltip>
             <TooltipTrigger asChild>
               <div
-                className={`p-2 rounded border ${activeTool === 'fill' ? 'bg-muted border-black' : 'bg-white'}`}
+                className={`p-2 rounded border ${activeTool === 'fill' ? 'bg-muted border-black' : 'bg-white'} cursor-pointer`}
                 onClick={() => handleToolChange('fill')}
               >
                 <Circle size={20} />
@@ -631,7 +668,7 @@ const ColoringActivity: React.FC<ColoringActivityProps> = ({
           <Tooltip>
             <TooltipTrigger asChild>
               <div
-                className={`p-2 rounded border ${activeTool === 'eraser' ? 'bg-muted border-black' : 'bg-white'}`}
+                className={`p-2 rounded border ${activeTool === 'eraser' ? 'bg-muted border-black' : 'bg-white'} cursor-pointer`}
                 onClick={() => handleToolChange('eraser')}
               >
                 <Eraser size={20} />
@@ -640,6 +677,22 @@ const ColoringActivity: React.FC<ColoringActivityProps> = ({
             <TooltipContent>Eraser</TooltipContent>
           </Tooltip>
         </TooltipProvider>
+        
+        {/* Brush size slider for older children */}
+        {(ageGroup === '4-5' || ageGroup === '5-7' || ageGroup === '7-9' || ageGroup === '10-12') && (
+          <div className="flex items-center gap-1 ml-2">
+            <div className="h-3 w-3 rounded-full bg-current" />
+            <input
+              type="range"
+              min="5"
+              max="25"
+              value={brushSize}
+              onChange={(e) => setBrushSize(parseInt(e.target.value))}
+              className="w-20"
+            />
+            <div className="h-5 w-5 rounded-full bg-current" />
+          </div>
+        )}
         
         <div className="ml-auto flex items-center gap-2">
           <div className="flex items-center gap-2">
@@ -720,14 +773,14 @@ const ColoringActivity: React.FC<ColoringActivityProps> = ({
       
       <div className="flex justify-center mt-4">
         <div className="text-center w-full max-w-md">
-          {ageGroup === '0-3' && (
+          {/* Parent tips section */}
+          {showParentTip ? (
+            <div className="text-sm bg-soft-peach/30 p-3 rounded animate-fade-in">
+              <strong>Parent tip:</strong> {currentTemplate.parentPrompt}
+            </div>
+          ) : (
             <div className="text-sm bg-soft-peach/30 p-3 rounded">
               <strong>Parent tip:</strong> Ask your child to name the colors they're using and the object they're coloring!
-            </div>
-          )}
-          {ageGroup === '3-4' && (
-            <div className="text-sm bg-soft-peach/30 p-3 rounded">
-              <strong>Parent tip:</strong> Ask questions like "What color is an apple in real life?" to help reinforce color recognition.
             </div>
           )}
         </div>
