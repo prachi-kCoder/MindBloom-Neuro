@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -7,7 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { speak } from '@/utils/textToSpeech';
-import { Circle, Save, Download, Paintbrush, FilledIcon, Eraser } from 'lucide-react';
+import { Circle, Save, Download, Paintbrush, FileIcon, Eraser } from 'lucide-react';
 
 interface ColoringActivityProps {
   onProgress: (progress: number) => void;
@@ -21,7 +20,7 @@ const COLORING_TEMPLATES = [
   {
     id: 'apple',
     name: 'Apple',
-    image: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjUwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxwYXRoIGQ9Ik0yNTAgMTAwYzAtMzMuMzMzIDI1LTU4LjMzMyA3NS03NWwxMCAyMGMtNDEuNjY3IDEwLTYzLjMzMyAzMC02NSA2MHY0MGMzNi42NjctMzMuMzMzIDc4LjMzMy01MCAxMjUtNTAgNTAgMCA5MS42NjcgMjUgMTI1IDc1IDE2LjY2NyA0MS42NjcgMTYuNjY3IDgzLjMzMyAwIDEyNS04LjMzMyAxNi42NjctMzAgMzUuMTY3LTY1IDU1LjVzLTYyLjUgMzAuNS03NS4yIDMwLjVjLTguMiAwLTI5LjgtNy4xNjctNjQuOC0yMS41UzI2MCAzMzUgMjYwIDMzNXMtNDAuMzMzIDE0LjE2Ny03NS4zMzMgMjguNVMxMzMuMzMzIDM4NSAxMjUgMzg1Yy0xMi41IDAtNDAuMjMzLTEwLjE2Ny03NS43LTMwLjVTMjUgMzE2LjY2NyAxNiAzMDBjLTE2LjY2Ny00MS42NjctMTYuNjY3LTgzLjMzMyAwLTEyNSAzMy4zMzMtNTAgNzUtNzUgMTI1LTc1IDQ2LjY2NyAwIDg4LjMzMyAxNi42NjcgMTI1IDUwdi00MGMtMS44MzMtMzAtMjMuNS01MC02NS02MGwxMC0yMGM1MCAxNi42NjcgNzUgNDEuNjY3IDc1IDc1djYxbC0xMCAxMGEyMTYuNjI3IDIxNi42MjcgMCAwMC01MCAxNGMtMTYuNjY3IDYuNjY3LTMzLjMzMyAxNy41LTUwIDMyLjVTMTgzLjMzMyAzNTAgMTc1IDM1MGMtOC4zMzMgMC0yNS0xMC44MzMtNTAtMzIuNXMtMzMuMzMzLTI1LjgzMy01MC0zMi41YTE4MCAxODAgMCAwMC01MC0xNGwtMTAtMTB2LTYxWiIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPg==',
+    image: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjUwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxwYXRoIGQ9Ik0yNTAgMTAwYzAtMzMuMzMzIDI1LTU4LjMzMyA3NS03NWwxMCAyMGMtNDEuNjY3IDEwLTYzLjMzMyAzMC02NSA2MHY0MGMzNi42NjctMzMuMzMzIDc4LjMzMy01MCAxMjUtNTAgNTAgMCA5MS42NjcgMjUgMTI1IDc1IDE2LjY2NyA0MS42NjcgMTYuNjY3IDgzLjMzMyAwIDEyNS04LjMzMyAxNi42NjctMzAgMzUuMTY3LTY1IDU1LjVzLTYyLjUgMzAuNS03NS4yIDMwLjVjLTguMiAwLTI5LjgtNy4xNjctNjQuOC0yMS41UzI2MCAzMzUgMjYwIDMzNXMtNDAuMzMzIDE0LjE2Ny03NS4zMzMgMjguNVMxMzMuMzMzIDM4NSAxMjUgMzg1Yy0xMi41IDAtNDAuMjMzLTEwLjE2Ny03NS43LTMwLVTMjUgMzE2LjY2NyAxNiAzMDBjLTE2LjY2Ny00MS42NjctMTYuNjY3LTgzLjMzMyAwLTEyNSAzMy4zMzMtNTAgNzUtNzUgMTI1LTc1IDQ2LjY2NyAwIDg4LjMzMyAxNi42NjcgMTI1IDUwdi00MGMtMS44MzMtMzAtMjMuNS01MC02NS02MGwxMC0yMGM1MCAxNi42NjcgNzUgNDEuNjY3IDc1IDc1djYxbC0xMCAxMGEyMTYuNjI3IDIxNi42MjcgMCAwMC01MCAxNGMtMTYuNjY3IDYuNjY3LTMzLjMzMyAxNy41LTUwIDMyLjVTMTgzLjMzMyAzNTAgMTc1IDM1MGMtOC4zMzMgMC0yNS0xMC44MzMtNTAtMzIuNXMtMzMuMzMzLTI1LjgzMy01MC0zMi41YTE4MCAxODAgMCAwMC01MC0xNGwtMTAtMTB2LTYxWiIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+Cjwvc3ZnPg==',
     labelPosition: { x: 250, y: 50 },
     funFact: "Apples are a great source of fiber and vitamin C!",
     suggestedColors: ['#FF5555', '#FF0000', '#8B0000', '#006400', '#228B22']
@@ -53,7 +52,7 @@ const COLORING_TEMPLATES = [
   {
     id: 'fish',
     name: 'Fish',
-    image: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjUwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxwYXRoIGQ9Ik0xMzAgMjUwYzAtMzMuMzMzIDUwLTEwOC4zMzMgMTUwLTEyNSA4My4zMzMgMCAxNTAgNDEuNjY3IDIwMCAxMjVzLTExNi42NjcgMTI1LTIwMCAxMjVjLTEwMC0xNi42NjctMTUwLTkxLjY2Ny0xNTAtMTI1eiIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+CiAgICA8Y2lyY2xlIGN4PSIxODAiIGN5PSIyMjAiIHI9IjE1IiBmaWxsPSJibGFjayIvPgogICAgPHBhdGggZD0iTTEyMCAyNTBsLTcwIDUwIE0xMjAgMjUwbC03MC01MCIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiAvPgo8L3N2Zz4=',
+    image: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjUwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxwYXRoIGQ9Ik0xMzAgMjUwYzAtMzMuMzMzIDUwLTEwOC4zMzMgMTUwLTEyNSA4My4zMzMgMCAxNTAgNDEuNjY3IDIwMCAxMjVzLTExNi42NjcgMTI1LTIwMCAxMjVjLTEwMC0xNi42NjctMTUwLTkxLjY2Ny0xNTAtMTI1eiIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiAvPgo8L3N2Zz4=',
     labelPosition: { x: 250, y: 50 },
     funFact: "Fish live underwater and breathe through gills!",
     suggestedColors: ['#5555FF', '#00FFFF', '#FF5555', '#FFFF55', '#FF55AA']
