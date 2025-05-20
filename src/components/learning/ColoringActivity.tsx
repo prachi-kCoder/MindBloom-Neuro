@@ -2,6 +2,12 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Toggle } from '@/components/ui/toggle';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { speak } from '@/utils/textToSpeech';
+import { Circle, Save, Download, Paintbrush, FilledIcon, Eraser } from 'lucide-react';
 
 interface ColoringActivityProps {
   onProgress: (progress: number) => void;
@@ -54,6 +60,7 @@ const COLORING_TEMPLATES = [
   }
 ];
 
+// Limited palette for young children to prevent overload
 const COLORS = [
   { name: 'Red', value: '#FF5555' },
   { name: 'Blue', value: '#5555FF' },
@@ -63,9 +70,9 @@ const COLORS = [
   { name: 'Orange', value: '#FFAA55' },
   { name: 'Pink', value: '#FF55AA' },
   { name: 'Brown', value: '#A52A2A' },
-  { name: 'Black', value: '#000000' },
-  { name: 'Light Blue', value: '#00FFFF' },
 ];
+
+type ToolType = 'brush' | 'fill' | 'eraser';
 
 const ColoringActivity: React.FC<ColoringActivityProps> = ({ 
   onProgress, 
@@ -74,6 +81,7 @@ const ColoringActivity: React.FC<ColoringActivityProps> = ({
   ageGroup 
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const offscreenCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const [selectedColor, setSelectedColor] = useState(COLORS[0].value);
   const [currentTemplate, setCurrentTemplate] = useState(COLORING_TEMPLATES[0]);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -82,6 +90,13 @@ const ColoringActivity: React.FC<ColoringActivityProps> = ({
   const [colorCompletionCount, setColorCompletionCount] = useState<{[key: string]: number}>({});
   const [coloredPixels, setColoredPixels] = useState(0);
   const [totalPixels, setTotalPixels] = useState(0);
+  const [activeTool, setActiveTool] = useState<ToolType>('brush');
+  const [brushSize, setBrushSize] = useState(10);
+  const [outlineGlowMode, setOutlineGlowMode] = useState(true);
+  const [lastPosition, setLastPosition] = useState<{x: number, y: number} | null>(null);
+  
+  // Store outline data for bucket fill validation
+  const outlineDataRef = useRef<ImageData | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -90,6 +105,12 @@ const ColoringActivity: React.FC<ColoringActivityProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
+    // Create offscreen canvas for outline detection
+    const offscreenCanvas = document.createElement('canvas');
+    offscreenCanvas.width = canvas.width;
+    offscreenCanvas.height = canvas.height;
+    offscreenCanvasRef.current = offscreenCanvas;
+    
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
@@ -97,6 +118,13 @@ const ColoringActivity: React.FC<ColoringActivityProps> = ({
     const img = new Image();
     img.onload = () => {
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      
+      // Store outline data for bucket fill validation
+      const offscreenCtx = offscreenCanvas.getContext('2d');
+      if (offscreenCtx) {
+        offscreenCtx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        outlineDataRef.current = offscreenCtx.getImageData(0, 0, canvas.width, canvas.height);
+      }
       
       // Set the initial total pixels (this is an approximation)
       // In a real implementation, you'd count the actual drawable pixels
@@ -112,6 +140,10 @@ const ColoringActivity: React.FC<ColoringActivityProps> = ({
     
     // Update tutor message with fun fact
     setTutorMessage(`Let's color a ${currentTemplate.name}! ${currentTemplate.funFact}`);
+    
+    // Announce the template with speech
+    speak(`Let's color a ${currentTemplate.name}! ${currentTemplate.funFact}`);
+    
   }, [currentTemplate, currentStep, onProgress]);
   
   const handleTemplateChange = (value: string) => {
@@ -119,6 +151,7 @@ const ColoringActivity: React.FC<ColoringActivityProps> = ({
     if (template) {
       setCurrentTemplate(template);
       setTutorMessage(`Let's color a ${template.name}! ${template.funFact}`);
+      speak(`Let's color a ${template.name}! ${template.funFact}`);
       
       // Reset coloring progress
       setColoredPixels(0);
@@ -130,15 +163,58 @@ const ColoringActivity: React.FC<ColoringActivityProps> = ({
     setSelectedColor(value);
     const colorName = COLORS.find(c => c.value === value)?.name || "this color";
     setTutorMessage(`Great! Let's use ${colorName} to color the ${currentTemplate.name}.`);
+    
+    // Announce the color with speech
+    speak(colorName);
+  };
+  
+  const handleToolChange = (tool: ToolType) => {
+    setActiveTool(tool);
+    
+    if (tool === 'brush') {
+      setTutorMessage("Use the brush to color small areas");
+    } else if (tool === 'fill') {
+      setTutorMessage("Tap inside an area to fill it with color!");
+    } else if (tool === 'eraser') {
+      setTutorMessage("Use the eraser to fix mistakes");
+    }
   };
   
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
-    setIsDrawing(true);
-    draw(e);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    let x, y;
+    
+    if ('touches' in e) {
+      // Touch event
+      x = e.touches[0].clientX - rect.left;
+      y = e.touches[0].clientY - rect.top;
+    } else {
+      // Mouse event
+      x = e.clientX - rect.left;
+      y = e.clientY - rect.top;
+    }
+    
+    // Scale coordinates to canvas size
+    x = (x / rect.width) * canvas.width;
+    y = (y / rect.height) * canvas.height;
+    
+    if (activeTool === 'fill') {
+      // Handle bucket fill tool
+      bucketFill(Math.floor(x), Math.floor(y));
+    } else {
+      // For brush or eraser
+      setIsDrawing(true);
+      setLastPosition({ x, y });
+      draw(e);
+    }
   };
   
   const stopDrawing = () => {
     setIsDrawing(false);
+    setLastPosition(null);
     
     // Update progress after each drawing session
     if (totalPixels > 0) {
@@ -150,12 +226,14 @@ const ColoringActivity: React.FC<ColoringActivityProps> = ({
         setTutorMessage("You're doing great with your coloring! Keep going!");
       } else if (progress >= 99) {
         setTutorMessage("Wonderful job! You've finished coloring. Try another picture if you'd like!");
+        speak("Wonderful job! You've finished coloring.");
       }
     }
   };
   
   const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (!isDrawing) return;
+    if (activeTool !== 'brush' && activeTool !== 'eraser') return;
     
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -179,29 +257,210 @@ const ColoringActivity: React.FC<ColoringActivityProps> = ({
     x = (x / rect.width) * canvas.width;
     y = (y / rect.height) * canvas.height;
     
-    ctx.fillStyle = selectedColor;
-    ctx.strokeStyle = selectedColor;
-    ctx.lineWidth = 10;
+    // Set drawing styles based on selected tool
+    if (activeTool === 'eraser') {
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.lineWidth = brushSize + 5; // Slightly larger eraser
+    } else {
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.fillStyle = selectedColor;
+      ctx.strokeStyle = selectedColor;
+      ctx.lineWidth = brushSize;
+    }
+    
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     
-    ctx.lineTo(x, y);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(x, y, 5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(x, y);
+    // Use last position for smoother lines
+    if (lastPosition) {
+      ctx.beginPath();
+      ctx.moveTo(lastPosition.x, lastPosition.y);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+      
+      // Draw circle at the end point for smoother connection
+      ctx.beginPath();
+      ctx.arc(x, y, brushSize / 2, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Check if coloring outside lines in outline glow mode
+      if (outlineGlowMode && activeTool === 'brush') {
+        checkOutlineCrossing(lastPosition.x, lastPosition.y, x, y);
+      }
+      
+      // Track colored pixels (approximate)
+      const pixelsAdded = Math.max(5, Math.floor(Math.sqrt(
+        Math.pow(x - lastPosition.x, 2) + Math.pow(y - lastPosition.y, 2)
+      ) * brushSize));
+      
+      setColoredPixels(prev => prev + pixelsAdded);
+      
+      // Track colors used
+      if (activeTool === 'brush') {
+        const colorName = COLORS.find(c => c.value === selectedColor)?.name || "Color";
+        setColorCompletionCount(prev => ({
+          ...prev,
+          [colorName]: (prev[colorName] || 0) + pixelsAdded
+        }));
+      }
+    }
     
-    // Track colored pixels (approximate)
-    setColoredPixels(prev => prev + 10);
+    setLastPosition({ x, y });
+  };
+  
+  // Bucket fill implementation
+  const bucketFill = (startX: number, startY: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
     
-    // Track colors used (for educational feedback)
+    // Get image data to work with pixels
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    
+    // Get the color to fill with
+    const fillColor = hexToRgb(selectedColor);
+    if (!fillColor) return;
+    
+    // Get the color of the clicked pixel
+    const targetColor = {
+      r: data[(startY * canvas.width + startX) * 4],
+      g: data[(startY * canvas.width + startX) * 4 + 1],
+      b: data[(startY * canvas.width + startX) * 4 + 2],
+      a: data[(startY * canvas.width + startX) * 4 + 3]
+    };
+    
+    // If we're filling with the same color, no need to continue
+    if (colorsMatch(targetColor, fillColor)) return;
+    
+    // Check if we're trying to fill an outline
+    if (outlineGlowMode && outlineDataRef.current) {
+      const outlineData = outlineDataRef.current.data;
+      const index = (startY * canvas.width + startX) * 4;
+      // If the pixel is black (part of the outline), show warning
+      if (outlineData[index] < 50 && outlineData[index + 1] < 50 && outlineData[index + 2] < 50) {
+        showOutlineWarning();
+        return;
+      }
+    }
+    
+    // Create a queue for flood fill algorithm
+    const queue: [number, number][] = [];
+    queue.push([startX, startY]);
+    
+    // Count filled pixels
+    let pixelsFilled = 0;
+    
+    // Perform flood fill
+    while (queue.length > 0) {
+      const [x, y] = queue.shift()!;
+      const currentIndex = (y * canvas.width + x) * 4;
+      
+      // Check if this pixel matches target color
+      if (
+        x >= 0 && x < canvas.width &&
+        y >= 0 && y < canvas.height &&
+        data[currentIndex] === targetColor.r &&
+        data[currentIndex + 1] === targetColor.g &&
+        data[currentIndex + 2] === targetColor.b &&
+        data[currentIndex + 3] === targetColor.a
+      ) {
+        // Fill the pixel
+        data[currentIndex] = fillColor.r;
+        data[currentIndex + 1] = fillColor.g;
+        data[currentIndex + 2] = fillColor.b;
+        data[currentIndex + 3] = 255;
+        
+        pixelsFilled++;
+        
+        // Add surrounding pixels to the queue
+        queue.push([x + 1, y]);
+        queue.push([x - 1, y]);
+        queue.push([x, y + 1]);
+        queue.push([x, y - 1]);
+        
+        // Limit queue size for performance
+        if (queue.length > 10000) {
+          break;
+        }
+      }
+    }
+    
+    // Update canvas with the filled area
+    ctx.putImageData(imageData, 0, 0);
+    
+    // Track colored pixels and colors used
+    setColoredPixels(prev => prev + pixelsFilled);
     const colorName = COLORS.find(c => c.value === selectedColor)?.name || "Color";
     setColorCompletionCount(prev => ({
       ...prev,
-      [colorName]: (prev[colorName] || 0) + 1
+      [colorName]: (prev[colorName] || 0) + pixelsFilled
     }));
+    
+    // Say color name
+    speak(colorName);
+  };
+  
+  // Check if coloring crosses an outline
+  const checkOutlineCrossing = (x1: number, y1: number, x2: number, y2: number) => {
+    if (!outlineDataRef.current) return;
+    
+    const outlineData = outlineDataRef.current.data;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    // Sample points along the line
+    const distance = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    const steps = Math.max(5, Math.ceil(distance));
+    
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      const x = Math.floor(x1 + (x2 - x1) * t);
+      const y = Math.floor(y1 + (y2 - y1) * t);
+      
+      if (x < 0 || x >= canvas.width || y < 0 || y >= canvas.height) continue;
+      
+      const index = (y * canvas.width + x) * 4;
+      
+      // Check if we hit an outline (black pixel)
+      if (outlineData[index] < 50 && outlineData[index + 1] < 50 && outlineData[index + 2] < 50) {
+        showOutlineWarning();
+        return;
+      }
+    }
+  };
+  
+  // Show warning when coloring outside lines
+  const showOutlineWarning = () => {
+    setTutorMessage("Let's try to color inside the lines!");
+    speak("Let's try to color inside the lines!");
+    
+    // Add temporary glow effect to outline
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    // Save current state
+    ctx.save();
+    
+    // Add red glow to outline
+    ctx.shadowColor = 'red';
+    ctx.shadowBlur = 10;
+    
+    // Redraw the template outline
+    const img = new Image();
+    img.onload = () => {
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      
+      // Remove glow after a short time
+      setTimeout(() => {
+        ctx.restore();
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      }, 1000);
+    };
+    img.src = currentTemplate.image;
   };
   
   const showSuggestedColors = () => {
@@ -211,6 +470,54 @@ const ColoringActivity: React.FC<ColoringActivityProps> = ({
     } else {
       setTutorMessage(`Let's color a ${currentTemplate.name}! ${currentTemplate.funFact}`);
     }
+  };
+  
+  // Save the current artwork to PNG
+  const saveArtwork = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    try {
+      // Convert canvas to data URL
+      const dataUrl = canvas.toDataURL('image/png');
+      
+      // Try to store in localStorage (with error handling for quota exceeded)
+      try {
+        localStorage.setItem(`coloring_${currentTemplate.id}`, dataUrl);
+        setTutorMessage("Your artwork has been saved! You can see it later.");
+        speak("Your artwork has been saved!");
+      } catch (e) {
+        console.error("Error saving to localStorage:", e);
+        // Continue with download as fallback
+      }
+      
+      // Create download link
+      const link = document.createElement('a');
+      link.download = `${currentTemplate.name}_coloring.png`;
+      link.href = dataUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (e) {
+      console.error("Error saving artwork:", e);
+      setTutorMessage("There was a problem saving your artwork.");
+    }
+  };
+  
+  // Helper function for bucket fill to convert hex to RGB
+  const hexToRgb = (hex: string) => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16),
+      a: 255
+    } : null;
+  };
+  
+  // Helper function to compare colors
+  const colorsMatch = (color1: {r: number, g: number, b: number, a: number}, color2: {r: number, g: number, b: number, a: number}) => {
+    return color1.r === color2.r && color1.g === color2.g && color1.b === color2.b;
   };
   
   return (
@@ -224,6 +531,7 @@ const ColoringActivity: React.FC<ColoringActivityProps> = ({
       </div>
       
       <div className="flex flex-wrap gap-4 mb-4">
+        {/* Template selection */}
         <div className="w-full sm:w-auto">
           <p className="text-sm mb-1">Choose a picture:</p>
           <Select onValueChange={handleTemplateChange} defaultValue={currentTemplate.id}>
@@ -238,6 +546,7 @@ const ColoringActivity: React.FC<ColoringActivityProps> = ({
           </Select>
         </div>
         
+        {/* Color selection */}
         <div>
           <div className="flex items-center justify-between mb-1">
             <p className="text-sm">Choose a color:</p>
@@ -253,13 +562,20 @@ const ColoringActivity: React.FC<ColoringActivityProps> = ({
           
           <div className="flex flex-wrap gap-2">
             {COLORS.map(color => (
-              <button
-                key={color.name}
-                className={`w-8 h-8 rounded-full border-2 ${selectedColor === color.value ? 'border-black' : 'border-transparent'}`}
-                style={{ backgroundColor: color.value }}
-                onClick={() => handleColorChange(color.value)}
-                title={color.name}
-              />
+              <TooltipProvider key={color.name}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      className={`w-8 h-8 rounded-full border-2 ${selectedColor === color.value ? 'border-black' : 'border-transparent'}`}
+                      style={{ backgroundColor: color.value }}
+                      onClick={() => handleColorChange(color.value)}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {color.name}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             ))}
           </div>
           
@@ -282,6 +598,78 @@ const ColoringActivity: React.FC<ColoringActivityProps> = ({
         </div>
       </div>
       
+      {/* Drawing tools */}
+      <div className="flex flex-wrap gap-2 mb-2">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div 
+                className={`p-2 rounded border ${activeTool === 'brush' ? 'bg-muted border-black' : 'bg-white'}`}
+                onClick={() => handleToolChange('brush')}
+              >
+                <Paintbrush size={20} />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>Brush</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div
+                className={`p-2 rounded border ${activeTool === 'fill' ? 'bg-muted border-black' : 'bg-white'}`}
+                onClick={() => handleToolChange('fill')}
+              >
+                <Circle size={20} />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>Fill</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div
+                className={`p-2 rounded border ${activeTool === 'eraser' ? 'bg-muted border-black' : 'bg-white'}`}
+                onClick={() => handleToolChange('eraser')}
+              >
+                <Eraser size={20} />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>Eraser</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        
+        <div className="ml-auto flex items-center gap-2">
+          <div className="flex items-center gap-2">
+            <Label htmlFor="outline-glow" className="text-sm">Outline Help:</Label>
+            <Switch
+              id="outline-glow"
+              checked={outlineGlowMode}
+              onCheckedChange={setOutlineGlowMode}
+            />
+          </div>
+          
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={saveArtwork}
+                >
+                  <Download size={18} />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Save your artwork</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      </div>
+      
+      {/* Canvas */}
       <div className="relative border rounded-lg overflow-hidden">
         <canvas
           ref={canvasRef}
@@ -332,16 +720,16 @@ const ColoringActivity: React.FC<ColoringActivityProps> = ({
       )}
       
       <div className="flex justify-center mt-4">
-        <div className="text-center">
+        <div className="text-center w-full max-w-md">
           {ageGroup === '0-3' && (
-            <p className="text-sm bg-soft-peach/30 p-3 rounded">
+            <div className="text-sm bg-soft-peach/30 p-3 rounded">
               <strong>Parent tip:</strong> Ask your child to name the colors they're using and the object they're coloring!
-            </p>
+            </div>
           )}
           {ageGroup === '3-4' && (
-            <p className="text-sm bg-soft-peach/30 p-3 rounded">
+            <div className="text-sm bg-soft-peach/30 p-3 rounded">
               <strong>Parent tip:</strong> Ask questions like "What color is an apple in real life?" to help reinforce color recognition.
-            </p>
+            </div>
           )}
         </div>
       </div>
