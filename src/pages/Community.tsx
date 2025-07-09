@@ -18,6 +18,28 @@ const Community = () => {
             and learn from each other in a supportive environment.
           </p>
         </div>
+
+        <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-xl p-8 mb-16">
+          <div className="flex flex-col md:flex-row items-center gap-8">
+            <div className="flex-shrink-0">
+              <img 
+                src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=300&h=300&fit=crop&crop=face" 
+                alt="Teacher Bloom - Your friendly learning companion"
+                className="w-32 h-32 rounded-full object-cover shadow-lg"
+              />
+            </div>
+            <div className="text-center md:text-left">
+              <h2 className="text-2xl font-bold mb-4">Meet Teacher Bloom</h2>
+              <p className="text-muted-foreground text-lg mb-4">
+                Your friendly AI learning companion who understands that every child learns differently. 
+                Teacher Bloom is here to support your family's journey with patience, expertise, and endless encouragement.
+              </p>
+              <Button className="bg-primary hover:bg-primary/90">
+                Start Learning with Teacher Bloom
+              </Button>
+            </div>
+          </div>
+        </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto mb-16">
           <Card className="text-center">
@@ -186,33 +208,64 @@ const Community = () => {
             <div className="space-y-6">
               {[
                 {
-                  title: "My son's speech therapy journey",
-                  content: "After 6 months of consistent therapy and the support of this community, my son went from speaking 5 words to full sentences.",
-                  author: "Patricia M."
+                  title: "From Non-Verbal to Confident Communicator: Emma's ADHD Journey",
+                  content: "When Emma was diagnosed with ADHD at age 6, she struggled with focus and communication. Through our community's support and specialized learning tools, she discovered her love for visual storytelling. Today, at 12, Emma creates digital art that helps other children understand ADHD. Her hyperfocus, once seen as a challenge, became her creative superpower.",
+                  author: "Sarah M., Emma's Mom",
+                  image: "https://images.unsplash.com/photo-1544717297-fa95b6ee9643?w=100&h=100&fit=crop&crop=face",
+                  badge: "ADHD Success"
                 },
                 {
-                  title: "How our support group changed everything",
-                  content: "Finding parents who understood our challenges gave us the strength to try new approaches that have made a tremendous difference.",
-                  author: "Robert & Julie"
+                  title: "Building Bridges: How Our Autism Support Group Changed Everything",
+                  content: "Finding parents who understood our challenges with Jacob's autism gave us hope when we felt isolated. The weekly virtual meetups became our lifeline. We learned practical strategies for sensory regulation and social skills development. Jacob now thrives in his inclusive classroom and has formed his first friendships. The community support made all the difference.",
+                  author: "Michael & Lisa Chen",
+                  image: "https://images.unsplash.com/photo-1509909756405-be0199881695?w=100&h=100&fit=crop&crop=face",
+                  badge: "ASD Success"
+                },
+                {
+                  title: "Reading Rainbow: Overcoming Dyslexia with Community Support",
+                  content: "When Alex was struggling with reading in 3rd grade, we felt lost and overwhelmed. The dyslexia support group connected us with evidence-based interventions and emotional support. Through structured literacy programs and the community's encouragement, Alex went from reading below grade level to becoming our family's bookworm. He now tutors other children with dyslexia.",
+                  author: "Jennifer Rodriguez",
+                  image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=100&h=100&fit=crop&crop=face",
+                  badge: "Dyslexia Success"
+                },
+                {
+                  title: "The Power of Early Intervention: Maya's Sensory Processing Journey",
+                  content: "Maya's sensory processing challenges made daily activities overwhelming for our family. Through our community, we connected with an occupational therapist who specialized in sensory integration. The personalized sensory diet and community support helped Maya develop coping strategies. She now participates confidently in school activities and has discovered her passion for music therapy.",
+                  author: "Priya Patel",
+                  image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
+                  badge: "Sensory Success"
                 }
               ].map((story, i) => (
-                <Card key={i}>
+                <Card key={i} className="overflow-hidden">
                   <CardHeader>
-                    <CardTitle>{story.title}</CardTitle>
-                    <CardDescription>Shared by {story.author}</CardDescription>
+                    <div className="flex items-start gap-4">
+                      <Avatar className="h-12 w-12">
+                        <AvatarImage src={story.image} alt={story.author} />
+                        <AvatarFallback>{story.author[0]}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <CardTitle className="text-lg">{story.title}</CardTitle>
+                          <Badge variant="secondary" className="text-xs">{story.badge}</Badge>
+                        </div>
+                        <CardDescription>Shared by {story.author}</CardDescription>
+                      </div>
+                    </div>
                   </CardHeader>
                   <CardContent>
-                    <p>{story.content}</p>
+                    <p className="text-sm leading-relaxed">{story.content}</p>
                   </CardContent>
                   <CardFooter>
-                    <Button variant="outline">Read Full Story</Button>
+                    <Button variant="outline" size="sm">Read Full Story</Button>
                   </CardFooter>
                 </Card>
               ))}
-              <div className="bg-muted/50 rounded-lg p-6 text-center">
-                <h3 className="font-semibold mb-2">Share Your Story</h3>
+              
+              <div className="bg-gradient-to-r from-primary/5 to-secondary/5 rounded-lg p-6 text-center">
+                <h3 className="font-semibold mb-2">Share Your Success Story</h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Your journey could inspire and help other families facing similar challenges.
+                  Your journey could inspire and help other families facing similar challenges. 
+                  Every story of progress, no matter how small, gives hope to other parents.
                 </p>
                 <Button>Submit Your Story</Button>
               </div>

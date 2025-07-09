@@ -17,19 +17,19 @@ const resources = {
     {
       title: "Understanding ADHD in Children",
       description: "An introduction to ADHD symptoms, challenges, and strengths in children of different ages.",
-      image: "/placeholder.svg",
+      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=300&fit=crop&crop=face",
       link: "/resources/adhd/understanding"
     },
     {
       title: "ADHD Management Strategies",
       description: "Practical tips for helping children with ADHD succeed at home and in school.",
-      image: "/placeholder.svg",
+      image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&h=300&fit=crop",
       link: "/resources/adhd/strategies"
     },
     {
       title: "ADHD and Executive Function",
       description: "How ADHD affects planning, organization, and emotional regulation.",
-      image: "/placeholder.svg",
+      image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400&h=300&fit=crop",
       link: "/resources/adhd/executive-function"
     }
   ],
@@ -37,19 +37,19 @@ const resources = {
     {
       title: "Autism Spectrum Disorder Basics",
       description: "Understanding the spectrum of autism and how it manifests in children.",
-      image: "/placeholder.svg",
+      image: "https://images.unsplash.com/photo-1509909756405-be0199881695?w=400&h=300&fit=crop",
       link: "/resources/asd/basics"
     },
     {
       title: "Social Skills Development",
       description: "Activities and strategies to help children with ASD develop social understanding.",
-      image: "/placeholder.svg",
+      image: "https://images.unsplash.com/photo-1544717297-fa95b6ee9643?w=400&h=300&fit=crop",
       link: "/resources/asd/social-skills"
     },
     {
       title: "Managing Sensory Sensitivities",
       description: "Creating sensory-friendly environments for children with autism.",
-      image: "/placeholder.svg",
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop",
       link: "/resources/asd/sensory"
     }
   ],
@@ -57,19 +57,19 @@ const resources = {
     {
       title: "Signs of Dyslexia by Age",
       description: "How to recognize potential signs of dyslexia from preschool through teen years.",
-      image: "/placeholder.svg",
+      image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=300&fit=crop",
       link: "/resources/dyslexia/signs"
     },
     {
       title: "Reading Strategies for Dyslexia",
       description: "Evidence-based approaches to support reading development in dyslexic children.",
-      image: "/placeholder.svg",
+      image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&h=300&fit=crop",
       link: "/resources/dyslexia/reading"
     },
     {
       title: "Building Confidence in Dyslexic Learners",
       description: "How to nurture self-esteem and resilience in children with dyslexia.",
-      image: "/placeholder.svg",
+      image: "https://images.unsplash.com/photo-1544717297-fa95b6ee9643?w=400&h=300&fit=crop",
       link: "/resources/dyslexia/confidence"
     }
   ]
