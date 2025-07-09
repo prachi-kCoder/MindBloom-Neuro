@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -9,8 +10,21 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { Calendar as CalendarIcon, Clock, MapPin, ArrowLeft, Check } from 'lucide-react';
 import { format } from 'date-fns';
-import { Professional } from '@/components/appointments/ProfessionalCard';
 import { useToast } from '@/hooks/use-toast';
+
+// Define the Professional interface to match the data structure we're using
+interface Professional {
+  id: string;
+  name: string;
+  title: string;
+  specialties: string[];
+  experience: string;
+  education: string;
+  photo: string;
+  availability: string;
+  location: string;
+  bio: string;
+}
 
 // Extended Professional interface to include availableTimeSlots
 interface ExtendedProfessional extends Professional {
@@ -28,7 +42,7 @@ const PROFESSIONALS: ExtendedProfessional[] = [
     specialties: ["ADHD", "Anxiety", "Behavioral Issues"],
     experience: "15+ years",
     education: "Ph.D. in Clinical Psychology",
-    photo: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah&backgroundColor=b6e3f4",
+    photo: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=400&fit=crop&crop=face",
     availability: "Mon, Wed, Fri",
     location: "123 Health Center, San Francisco, CA",
     bio: "Dr. Johnson specializes in diagnosing and treating ADHD and anxiety disorders in children. She employs a holistic approach, working with parents to develop effective strategies for home and school.",
@@ -46,7 +60,7 @@ const PROFESSIONALS: ExtendedProfessional[] = [
     specialties: ["ASD", "Developmental Delays", "Sensory Processing"],
     experience: "12+ years",
     education: "M.D., Fellowship in Developmental Pediatrics",
-    photo: "https://api.dicebear.com/7.x/avataaars/svg?seed=Michael&backgroundColor=d1d4f9",
+    photo: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&h=400&fit=crop&crop=face",
     availability: "Tue, Thu, Sat",
     location: "456 Medical Plaza, San Francisco, CA",
     bio: "Dr. Chen has extensive experience working with children with autism spectrum disorders. He focuses on early intervention and collaborates with therapists to create comprehensive treatment plans.",
@@ -63,7 +77,7 @@ const PROFESSIONALS: ExtendedProfessional[] = [
     specialties: ["Dyslexia", "Learning Disabilities", "Gifted Assessment"],
     experience: "10+ years",
     education: "Ed.D. in Educational Psychology",
-    photo: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emily&backgroundColor=ffdfbf",
+    photo: "https://images.unsplash.com/photo-1594824388853-5d78f8b1cb9a?w=400&h=400&fit=crop&crop=face",
     availability: "Mon, Tue, Thu",
     location: "789 Learning Center, Oakland, CA",
     bio: "Dr. Rodriguez specializes in identifying and addressing learning disabilities. She works closely with schools to implement accommodations and develop individualized education plans.",
@@ -80,7 +94,7 @@ const PROFESSIONALS: ExtendedProfessional[] = [
     specialties: ["ADHD", "Mood Disorders", "Medication Management"],
     experience: "18+ years",
     education: "M.D., Board Certified in Child Psychiatry",
-    photo: "https://api.dicebear.com/7.x/avataaars/svg?seed=James&backgroundColor=c0aede",
+    photo: "https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=400&h=400&fit=crop&crop=face",
     availability: "Wed, Fri, Sat",
     location: "567 Wellness Center, Palo Alto, CA",
     bio: "Dr. Wilson provides comprehensive psychiatric evaluations and medication management. He believes in a thoughtful approach to medication, carefully weighing benefits against potential side effects.",
