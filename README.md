@@ -39,12 +39,14 @@
 - Screening Engine: Rule-based logic / basic ML (if applicable)
 
 ## 🧪 Getting Started
-- Clone the repo and get coding:
 
-|git clone https://github.com/prachi-kCoder/MindBloom-Neuro.git|
-|cd MindBloom-Neuro |
-|npm install |
-|npm run dev |
+| Step | Command                                                                 | Description                                         |
+|------|-------------------------------------------------------------------------|-----------------------------------------------------|
+| 1️⃣   | `git clone https://github.com/prachi-kCoder/MindBloom-Neuro.git`      | Clone the MindBloom repository to your local system |
+| 2️⃣   | `cd MindBloom-Neuro`                                                  | Navigate into the project directory                 |
+| 3️⃣   | `npm install`                                                         | Install all dependencies listed in `package.json`   |
+| 4️⃣   | `npm run dev`                                                         | Start the development server with live reloading    |
+
 
 ## 🤝 Contributing
 - We welcome contributions from developers, educators, designers, psychologists—anyone passionate about creating an equitable learning experience.
