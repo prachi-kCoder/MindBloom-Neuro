@@ -193,39 +193,55 @@ const LearningActivity = () => {
         title: "Alphabet Recognition",
         description: "Learn to recognize letters with fun images and sounds",
         totalSteps: 6,
-        tutorName: "Miss Sunny",
-        tutorAvatar: "https://ui-avatars.com/api/?name=Miss+Sunny&background=FFD700&color=fff"
+        tutorName: "Miss Sarah",
+        tutorAvatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200&h=200&fit=crop&crop=face"
       },
       "coloring": {
         title: "Coloring Fun", 
         description: "Color fun pictures and learn about objects",
         totalSteps: 4,
-        tutorName: "Mr. Rainbow",
-        tutorAvatar: "https://ui-avatars.com/api/?name=Mr+Rainbow&background=6A5ACD&color=fff"
+        tutorName: "Mr. James",
+        tutorAvatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=face"
       },
       "word-match-safari": {
         title: "Word Match Safari",
         description: "Match words with their synonyms and antonyms",
         totalSteps: 5,
-        tutorName: "Dr. Wordy",
-        tutorAvatar: "https://ui-avatars.com/api/?name=Dr+Wordy&background=4CAF50&color=fff",
+        tutorName: "Dr. Emma",
+        tutorAvatar: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=200&h=200&fit=crop&crop=face",
         benefits: ["Synonym/Antonym Recognition", "Word Relationships", "Visual Processing", "Vocabulary Building"]
       },
       "synonym-island": {
         title: "Synonym Island Adventure",
         description: "Find the right synonyms to discover hidden treasures",
         totalSteps: 8,
-        tutorName: "Captain Word",
-        tutorAvatar: "https://ui-avatars.com/api/?name=Captain+Word&background=2196F3&color=fff",
+        tutorName: "Captain Lisa",
+        tutorAvatar: "https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=200&h=200&fit=crop&crop=face",
         benefits: ["Synonym Recognition", "Context Understanding", "Reading Comprehension", "Vocabulary Expansion"]
       },
       "antonym-mountain": {
         title: "Antonym Mountain Trek",
         description: "Climb the mountain by selecting correct antonyms",
         totalSteps: 10,
-        tutorName: "Guide Sierra",
-        tutorAvatar: "https://ui-avatars.com/api/?name=Guide+Sierra&background=FF5722&color=fff",
+        tutorName: "Guide Michael",
+        tutorAvatar: "https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=200&h=200&fit=crop&crop=face",
         benefits: ["Antonym Recognition", "Opposite Concepts", "Vocabulary Expansion", "Critical Thinking"]
+      },
+      "memory-match": {
+        title: "Memory Match Game",
+        description: "Improve memory skills by matching cards",
+        totalSteps: 6,
+        tutorName: "Ms. Rachel",
+        tutorAvatar: "https://images.unsplash.com/photo-1594824388853-5d78f8b1cb9a?w=200&h=200&fit=crop&crop=face",
+        benefits: ["Memory Enhancement", "Pattern Recognition", "Concentration", "Visual Processing"]
+      },
+      "word-building": {
+        title: "Word Building Adventure",
+        description: "Build words letter by letter",
+        totalSteps: 8,
+        tutorName: "Teacher Alex",
+        tutorAvatar: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=200&h=200&fit=crop&crop=face",
+        benefits: ["Spelling Skills", "Letter Recognition", "Phonics", "Vocabulary Building"]
       }
     };
     
@@ -292,8 +308,8 @@ const LearningActivity = () => {
       title: "Learning Activity",
       description: "Interactive learning for development",
       totalSteps: 5,
-      tutorName: "Teacher Bloom",
-      tutorAvatar: "https://ui-avatars.com/api/?name=Teacher+Bloom&background=9370DB&color=fff"
+      tutorName: "Teacher Anna",
+      tutorAvatar: "https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=200&h=200&fit=crop&crop=face"
     };
     
     // Override with disability-specific details if available

@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Book, Book as BookIcon, GamepadIcon, BookOpen, BookText, Star, GraduationCap, Brain, FileText, Calculator } from 'lucide-react';
+import { Book, Book as BookIcon, GamepadIcon, BookOpen, BookText, Star, GraduationCap, Brain, FileText, Calculator, ArrowRight, Users, Clock, Trophy } from 'lucide-react';
 import LearningIntroduction from '@/components/learning/LearningIntroduction';
 import useDyslexiaFont from '@/hooks/useDyslexiaFont';
 
@@ -264,61 +263,135 @@ const Learning = () => {
       <div className="container px-4 py-8 md:py-12">
         {showIntro ? (
           <div className="max-w-4xl mx-auto">
-            <h1 className={`text-3xl md:text-4xl font-bold tracking-tight mb-8 text-center ${useDyslexicFont ? 'font-dyslexic' : ''}`}>
-              Welcome to the Learning Center
-            </h1>
+            <div className="text-center mb-12">
+              <h1 className={`text-4xl md:text-5xl font-bold tracking-tight mb-6 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent ${useDyslexicFont ? 'font-dyslexic' : ''}`}>
+                Welcome to Your Learning Journey
+              </h1>
+              <p className={`text-xl text-muted-foreground max-w-2xl mx-auto ${useDyslexicFont ? 'font-dyslexic' : ''}`}>
+                Personalized learning experiences designed specifically for your child's unique needs and learning style
+              </p>
+            </div>
             <LearningIntroduction onStart={handleStartLearning} />
           </div>
         ) : (
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <h1 className={`text-3xl md:text-4xl font-bold tracking-tight mb-2 ${useDyslexicFont ? 'font-dyslexic' : ''}`}>
-                  Interactive Learning Center
-                </h1>
-                <p className={`text-lg text-muted-foreground mb-4 ${useDyslexicFont ? 'font-dyslexic' : ''}`}>
-                  Engaging, age-appropriate activities designed for {selectedDisability} support
-                </p>
+          <div className="flex flex-col gap-8">
+            {/* Header Section with Better Messaging */}
+            <div className="relative bg-gradient-to-br from-primary/5 via-background to-accent/5 rounded-2xl p-8 border">
+              <div className="flex flex-col lg:flex-row items-start justify-between gap-6">
+                <div className="flex-1">
+                  <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium mb-4">
+                    <Users className="h-4 w-4" />
+                    {selectedDisability.charAt(0).toUpperCase() + selectedDisability.slice(1)} Support • Ages {selectedAgeGroup}
+                  </div>
+                  <h1 className={`text-3xl md:text-4xl font-bold tracking-tight mb-4 ${useDyslexicFont ? 'font-dyslexic' : ''}`}>
+                    Interactive Learning Center
+                  </h1>
+                  <p className={`text-lg text-muted-foreground mb-6 max-w-2xl ${useDyslexicFont ? 'font-dyslexic' : ''}`}>
+                    Engaging, research-based activities designed specifically for {selectedDisability} learning support. Each activity adapts to your child's pace and provides positive reinforcement.
+                  </p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div className="flex items-center gap-3 text-sm">
+                      <div className="bg-green-100 dark:bg-green-900/20 p-2 rounded-full">
+                        <Trophy className="h-4 w-4 text-green-600 dark:text-green-400" />
+                      </div>
+                      <div>
+                        <div className="font-medium">Progress Tracking</div>
+                        <div className="text-muted-foreground">Visual progress indicators</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm">
+                      <div className="bg-blue-100 dark:bg-blue-900/20 p-2 rounded-full">
+                        <Brain className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div>
+                        <div className="font-medium">Adaptive Learning</div>
+                        <div className="text-muted-foreground">Adjusts to learning pace</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm">
+                      <div className="bg-purple-100 dark:bg-purple-900/20 p-2 rounded-full">
+                        <Clock className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                      </div>
+                      <div>
+                        <div className="font-medium">Self-Paced</div>
+                        <div className="text-muted-foreground">Learn at your own speed</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex flex-col sm:flex-row items-center gap-3">
+                  <Button variant="outline" onClick={toggleDyslexicFont} className="whitespace-nowrap">
+                    {useDyslexicFont ? 'Standard Font' : 'Dyslexia-Friendly Font'}
+                  </Button>
+                  <Button variant="outline" onClick={() => setShowIntro(true)}>
+                    Change Age/Support Type
+                  </Button>
+                </div>
               </div>
+            </div>
+
+            {/* Quick Action Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <Card className="relative overflow-hidden bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+                <CardHeader>
+                  <CardTitle className={`flex items-center gap-2 ${useDyslexicFont ? 'font-dyslexic' : ''}`}>
+                    <FileText className="h-5 w-5 text-primary" />
+                    Upload Your Materials
+                  </CardTitle>
+                  <CardDescription className={useDyslexicFont ? 'font-dyslexic' : ''}>
+                    Transform your documents into interactive learning experiences with text-to-speech and highlighting
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button onClick={goToMaterials} className="w-full">
+                    Start Learning with Your Materials
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </CardContent>
+              </Card>
               
-              <div className="flex items-center gap-2">
-                <Button variant="outline" onClick={toggleDyslexicFont} className="whitespace-nowrap">
-                  {useDyslexicFont ? 'Standard Font' : 'Dyslexia-Friendly Font'}
-                </Button>
-                <Button variant="outline" onClick={() => setShowIntro(true)}>
-                  Change Age/Support
-                </Button>
-              </div>
+              <Card className="relative overflow-hidden bg-gradient-to-br from-accent/5 to-accent/10 border-accent/20">
+                <CardHeader>
+                  <CardTitle className={`flex items-center gap-2 ${useDyslexicFont ? 'font-dyslexic' : ''}`}>
+                    <Calculator className="h-5 w-5 text-accent-foreground" />
+                    Math Adventures
+                  </CardTitle>
+                  <CardDescription className={useDyslexicFont ? 'font-dyslexic' : ''}>
+                    Interactive math games that make learning numbers fun and engaging
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button variant="outline" onClick={() => {
+                    const mathTab = document.querySelector('[data-value="math"]') as HTMLButtonElement;
+                    if (mathTab) mathTab.click();
+                  }} className="w-full">
+                    Explore Math Games
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </CardContent>
+              </Card>
             </div>
 
             <div className="mb-8">
               <Tabs defaultValue="all" className="w-full">
-                <div className="flex justify-center mb-6">
-                  <TabsList className="grid grid-cols-3 md:grid-cols-4 w-full max-w-xl">
-                    <TabsTrigger value="all" className={useDyslexicFont ? 'font-dyslexic' : ''}>All Activities</TabsTrigger>
-                    <TabsTrigger value="games" className={useDyslexicFont ? 'font-dyslexic' : ''}>Games</TabsTrigger>
-                    <TabsTrigger value="activities" className={useDyslexicFont ? 'font-dyslexic' : ''}>Learning Activities</TabsTrigger>
-                    <TabsTrigger value="math" className={useDyslexicFont ? 'font-dyslexic' : ''}>
-                      <div className="flex items-center gap-1">
-                        <Calculator size={16} />
-                        <span>Math Games</span>
-                      </div>
+                <div className="flex justify-center mb-8">
+                  <TabsList className="grid grid-cols-4 w-full max-w-2xl h-12">
+                    <TabsTrigger value="all" className={`${useDyslexicFont ? 'font-dyslexic' : ''} data-[state=active]:bg-primary data-[state=active]:text-primary-foreground`}>
+                      All Activities
+                    </TabsTrigger>
+                    <TabsTrigger value="games" className={`${useDyslexicFont ? 'font-dyslexic' : ''} data-[state=active]:bg-primary data-[state=active]:text-primary-foreground`}>
+                      Games
+                    </TabsTrigger>
+                    <TabsTrigger value="activities" className={`${useDyslexicFont ? 'font-dyslexic' : ''} data-[state=active]:bg-primary data-[state=active]:text-primary-foreground`}>
+                      Learning
+                    </TabsTrigger>
+                    <TabsTrigger value="math" className={`${useDyslexicFont ? 'font-dyslexic' : ''} data-[state=active]:bg-primary data-[state=active]:text-primary-foreground`} data-value="math">
+                      <Calculator className="h-4 w-4 mr-1" />
+                      Math
                     </TabsTrigger>
                   </TabsList>
-                </div>
-                
-                {/* Add Educational Materials Button */}
-                <div className="flex justify-center mb-6">
-                  <Button 
-                    onClick={goToMaterials} 
-                    variant="outline" 
-                    className="w-full max-w-lg flex items-center gap-2"
-                  >
-                    <FileText className="h-4 w-4" />
-                    <span className={`${useDyslexicFont ? 'font-dyslexic' : ''}`}>
-                      Upload Educational Materials
-                    </span>
-                  </Button>
                 </div>
                 
                 <TabsContent value="all" className="space-y-8">

@@ -1,149 +1,152 @@
 
 import React from 'react';
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin } from "lucide-react";
-import { useNavigate } from 'react-router-dom';
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Star, MapPin, Clock, Award, Phone, Video } from 'lucide-react';
 
-export interface Professional {
+interface Professional {
   id: string;
   name: string;
   title: string;
   specialties: string[];
+  rating: number;
+  reviewCount: number;
+  location: string;
   experience: string;
   education: string;
-  photo: string;
-  availability: string;
-  location: string;
-  bio: string;
+  languages: string[];
+  consultationFee: string;
+  availableToday: boolean;
+  nextAvailable: string;
+  image: string;
+  verified: boolean;
+  telehealth: boolean;
+  inPerson: boolean;
 }
 
 interface ProfessionalCardProps {
   professional: Professional;
-  compact?: boolean;
+  onBookAppointment: (professional: Professional) => void;
 }
 
-const ProfessionalCard: React.FC<ProfessionalCardProps> = ({
-  professional,
-  compact = false
+const ProfessionalCard: React.FC<ProfessionalCardProps> = ({ 
+  professional, 
+  onBookAppointment 
 }) => {
-  const navigate = useNavigate();
-  
-  const handleBookAppointment = () => {
-    navigate(`/appointments/book/${professional.id}`);
-  };
-  
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(part => part[0])
-      .join('')
-      .toUpperCase();
-  };
-  
-  if (compact) {
-    return (
-      <Card className="h-full transition-all hover:shadow-md">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-3">
-            <Avatar>
-              <AvatarImage 
-                src={professional.photo} 
-                alt={professional.name} 
-              />
-              <AvatarFallback>{getInitials(professional.name)}</AvatarFallback>
+  return (
+    <Card className="h-full transition-all duration-200 hover:shadow-lg border-l-4 border-l-primary/20">
+      <CardHeader className="pb-4">
+        <div className="flex items-start gap-4">
+          <div className="relative">
+            <Avatar className="h-20 w-20">
+              <AvatarImage src={professional.image} alt={professional.name} />
+              <AvatarFallback className="bg-primary/10 text-primary font-semibold text-lg">
+                {professional.name.split(' ').map(n => n[0]).join('')}
+              </AvatarFallback>
             </Avatar>
-            <div>
-              <h3 className="font-medium">{professional.name}</h3>
-              <p className="text-sm text-muted-foreground">{professional.title}</p>
-            </div>
-          </div>
-          <div className="mt-3 flex flex-wrap gap-1">
-            {professional.specialties.slice(0, 2).map(specialty => (
-              <Badge key={specialty} variant="secondary" className="text-xs">
-                {specialty}
-              </Badge>
-            ))}
-            {professional.specialties.length > 2 && (
-              <Badge variant="outline" className="text-xs">
-                +{professional.specialties.length - 2} more
-              </Badge>
+            {professional.verified && (
+              <div className="absolute -top-1 -right-1 bg-green-500 rounded-full p-1">
+                <Award className="h-3 w-3 text-white" />
+              </div>
             )}
           </div>
-        </CardContent>
-        <CardFooter className="p-4 pt-0 flex justify-between items-center">
-          <div className="text-xs text-muted-foreground">{professional.availability}</div>
-          <Button size="sm" variant="secondary" onClick={handleBookAppointment}>
-            Book
-          </Button>
-        </CardFooter>
-      </Card>
-    );
-  }
-  
-  return (
-    <Card className="h-full transition-all hover:shadow-md overflow-hidden">
-      <CardHeader className="p-0">
-        <div className="relative h-48">
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-black/30 z-10"></div>
-          <img 
-            src={professional.photo} 
-            alt={professional.name}
-            className="w-full h-full object-cover" 
-          />
-          <div className="absolute bottom-0 left-0 right-0 p-4 z-20">
-            <h3 className="text-white text-xl font-bold">{professional.name}</h3>
-            <p className="text-white/90 text-sm">{professional.title}</p>
+          
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between mb-2">
+              <div>
+                <h3 className="font-semibold text-lg leading-tight">{professional.name}</h3>
+                <p className="text-primary font-medium">{professional.title}</p>
+              </div>
+              <div className="flex items-center gap-1 text-sm">
+                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                <span className="font-medium">{professional.rating}</span>
+                <span className="text-muted-foreground">({professional.reviewCount})</span>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+              <MapPin className="h-4 w-4" />
+              <span>{professional.location}</span>
+              <span>•</span>
+              <span>{professional.experience}</span>
+            </div>
+            
+            <div className="flex flex-wrap gap-1 mb-2">
+              {professional.specialties.slice(0, 2).map((specialty) => (
+                <Badge key={specialty} variant="secondary" className="text-xs">
+                  {specialty}
+                </Badge>
+              ))}
+              {professional.specialties.length > 2 && (
+                <Badge variant="outline" className="text-xs">
+                  +{professional.specialties.length - 2} more
+                </Badge>
+              )}
+            </div>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="p-6">
-        <div className="flex flex-wrap gap-2 mb-4">
-          {professional.specialties.map(specialty => (
-            <Badge key={specialty} variant="secondary">
-              {specialty}
-            </Badge>
-          ))}
-        </div>
-        
-        <div className="space-y-5">
-          <div>
-            <p className="text-muted-foreground text-sm mt-1 line-clamp-3">{professional.bio}</p>
+      
+      <CardContent className="pt-0">
+        <div className="space-y-3">
+          <div className="text-sm">
+            <p className="font-medium text-muted-foreground mb-1">Education</p>
+            <p className="text-sm">{professional.education}</p>
           </div>
           
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="bg-muted/10 p-3 rounded-md">
-              <h4 className="font-medium text-sm mb-1">Experience</h4>
-              <p className="text-muted-foreground text-sm">{professional.experience}</p>
-            </div>
-            
-            <div className="bg-muted/10 p-3 rounded-md">
-              <h4 className="font-medium text-sm mb-1">Education</h4>
-              <p className="text-muted-foreground text-sm">{professional.education}</p>
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-2">
+              <span className="font-medium">Languages:</span>
+              <span className="text-muted-foreground">
+                {professional.languages.join(', ')}
+              </span>
             </div>
           </div>
           
-          <div className="grid grid-cols-1 gap-0">
-            <div className="flex items-center gap-2 py-2">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <p className="text-sm">{professional.availability}</p>
+          <div className="flex items-center justify-between">
+            <div className="text-sm">
+              <span className="font-semibold text-lg text-primary">
+                {professional.consultationFee}
+              </span>
+              <span className="text-muted-foreground"> /session</span>
             </div>
-            
-            <div className="flex items-center gap-2 py-2">
-              <MapPin className="h-4 w-4 text-muted-foreground" />
-              <p className="text-sm">{professional.location}</p>
+            <div className="flex items-center gap-2">
+              {professional.telehealth && (
+                <div className="flex items-center gap-1 text-xs text-blue-600">
+                  <Video className="h-3 w-3" />
+                  <span>Video</span>
+                </div>
+              )}
+              {professional.inPerson && (
+                <div className="flex items-center gap-1 text-xs text-green-600">
+                  <Phone className="h-3 w-3" />
+                  <span>In-person</span>
+                </div>
+              )}
             </div>
           </div>
+          
+          <div className="flex items-center gap-2 text-sm">
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            <span className="text-muted-foreground">
+              {professional.availableToday 
+                ? "Available today" 
+                : `Next available: ${professional.nextAvailable}`
+              }
+            </span>
+          </div>
+          
+          <Button 
+            onClick={() => onBookAppointment(professional)}
+            className="w-full mt-4"
+            variant={professional.availableToday ? "default" : "outline"}
+          >
+            {professional.availableToday ? "Book Today" : "Schedule Appointment"}
+          </Button>
         </div>
       </CardContent>
-      <CardFooter className="p-6 pt-0">
-        <Button className="w-full" onClick={handleBookAppointment}>
-          <Calendar className="mr-2 h-4 w-4" />
-          Schedule Appointment
-        </Button>
-      </CardFooter>
     </Card>
   );
 };

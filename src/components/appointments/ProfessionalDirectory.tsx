@@ -1,147 +1,182 @@
 
 import React, { useState } from 'react';
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import ProfessionalCard, { Professional } from './ProfessionalCard';
-import { Search, UserRound, Check } from 'lucide-react';
+import { Search, Filter, MapPin } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import ProfessionalCard from './ProfessionalCard';
 
-// Mock data for professionals
-const PROFESSIONALS: Professional[] = [
+const professionals = [
   {
-    id: "1",
-    name: "Dr. Sarah Johnson",
-    title: "Child Psychologist",
-    specialties: ["ADHD", "Anxiety", "Behavioral Issues"],
-    experience: "15+ years",
-    education: "Ph.D. in Clinical Psychology",
-    photo: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah&backgroundColor=b6e3f4",
-    availability: "Mon, Wed, Fri",
-    location: "San Francisco, CA",
-    bio: "Dr. Johnson specializes in diagnosing and treating ADHD and anxiety disorders in children. She employs a holistic approach, working with parents to develop effective strategies for home and school."
+    id: '1',
+    name: 'Dr. Sarah Johnson',
+    title: 'Pediatric Developmental Specialist',
+    specialties: ['Dyslexia Assessment', 'ADHD Evaluation', 'Learning Disabilities', 'Behavioral Therapy'],
+    rating: 4.9,
+    reviewCount: 127,
+    location: 'New York, NY',
+    experience: '12 years experience',
+    education: 'MD from Harvard Medical School, PhD in Developmental Psychology',
+    languages: ['English', 'Spanish'],
+    consultationFee: '$180',
+    availableToday: true,
+    nextAvailable: 'Today at 3:00 PM',
+    image: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=400&fit=crop&crop=face',
+    verified: true,
+    telehealth: true,
+    inPerson: true
   },
   {
-    id: "2",
-    name: "Dr. Michael Chen",
-    title: "Developmental Pediatrician",
-    specialties: ["ASD", "Developmental Delays", "Sensory Processing"],
-    experience: "12+ years",
-    education: "M.D., Fellowship in Developmental Pediatrics",
-    photo: "https://api.dicebear.com/7.x/avataaars/svg?seed=Michael&backgroundColor=d1d4f9",
-    availability: "Tue, Thu, Sat",
-    location: "San Francisco, CA",
-    bio: "Dr. Chen has extensive experience working with children with autism spectrum disorders. He focuses on early intervention and collaborates with therapists to create comprehensive treatment plans."
+    id: '2',
+    name: 'Dr. Michael Chen',
+    title: 'Child Neuropsychologist',
+    specialties: ['Autism Spectrum Disorders', 'ADHD', 'Executive Function', 'Memory Assessment'],
+    rating: 4.8,
+    reviewCount: 98,
+    location: 'Los Angeles, CA',
+    experience: '15 years experience',
+    education: 'PhD in Clinical Psychology, UCLA School of Medicine',
+    languages: ['English', 'Mandarin'],
+    consultationFee: '$200',
+    availableToday: false,
+    nextAvailable: 'Tomorrow at 10:00 AM',
+    image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&h=400&fit=crop&crop=face',
+    verified: true,
+    telehealth: true,
+    inPerson: false
   },
   {
-    id: "3",
-    name: "Dr. Emily Rodriguez",
-    title: "Educational Psychologist",
-    specialties: ["Dyslexia", "Learning Disabilities", "Gifted Assessment"],
-    experience: "10+ years",
-    education: "Ed.D. in Educational Psychology",
-    photo: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emily&backgroundColor=ffdfbf",
-    availability: "Mon, Tue, Thu",
-    location: "Oakland, CA",
-    bio: "Dr. Rodriguez specializes in identifying and addressing learning disabilities. She works closely with schools to implement accommodations and develop individualized education plans."
+    id: '3',
+    name: 'Dr. Emily Rodriguez',
+    title: 'Educational Psychologist',
+    specialties: ['Learning Assessments', 'IEP Planning', 'School Accommodations', 'Study Skills'],
+    rating: 4.7,
+    reviewCount: 156,
+    location: 'Chicago, IL',
+    experience: '10 years experience',
+    education: 'EdD in Educational Psychology, Teachers College Columbia',
+    languages: ['English', 'Spanish', 'Portuguese'],
+    consultationFee: '$150',
+    availableToday: true,
+    nextAvailable: 'Today at 5:00 PM',
+    image: 'https://images.unsplash.com/photo-1594824388853-5d78f8b1cb9a?w=400&h=400&fit=crop&crop=face',
+    verified: true,
+    telehealth: true,
+    inPerson: true
   },
   {
-    id: "4",
-    name: "Dr. James Wilson",
-    title: "Child Psychiatrist",
-    specialties: ["ADHD", "Mood Disorders", "Medication Management"],
-    experience: "18+ years",
-    education: "M.D., Board Certified in Child Psychiatry",
-    photo: "https://api.dicebear.com/7.x/avataaars/svg?seed=James&backgroundColor=c0aede",
-    availability: "Wed, Fri, Sat",
-    location: "Palo Alto, CA",
-    bio: "Dr. Wilson provides comprehensive psychiatric evaluations and medication management. He believes in a thoughtful approach to medication, carefully weighing benefits against potential side effects."
+    id: '4',
+    name: 'Dr. James Wilson',
+    title: 'Behavioral Therapist',
+    specialties: ['Applied Behavior Analysis', 'Social Skills Training', 'Autism Support', 'Family Counseling'],
+    rating: 4.9,
+    reviewCount: 89,
+    location: 'Austin, TX',
+    experience: '8 years experience',
+    education: 'PhD in Applied Behavior Analysis, University of Kansas',
+    languages: ['English'],
+    consultationFee: '$160',
+    availableToday: false,
+    nextAvailable: 'Monday at 9:00 AM',
+    image: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=400&h=400&fit=crop&crop=face',
+    verified: true,
+    telehealth: true,
+    inPerson: true
   },
   {
-    id: "5",
-    name: "Dr. Lisa Park",
-    title: "Speech-Language Pathologist",
-    specialties: ["Language Delays", "Articulation Disorders", "Social Communication"],
-    experience: "8+ years",
-    education: "Ph.D. in Speech-Language Pathology",
-    photo: "https://api.dicebear.com/7.x/avataaars/svg?seed=Lisa&backgroundColor=f9c0c0",
-    availability: "Mon, Wed, Fri",
-    location: "San Jose, CA",
-    bio: "Dr. Park specializes in diagnosing and treating communication disorders in children with ASD and developmental delays. She emphasizes functional communication skills for real-world success."
+    id: '5',
+    name: 'Dr. Lisa Thompson',
+    title: 'Speech-Language Pathologist',
+    specialties: ['Language Development', 'Reading Disorders', 'Communication Skills', 'Articulation'],
+    rating: 4.8,
+    reviewCount: 134,
+    location: 'Seattle, WA',
+    experience: '14 years experience',
+    education: 'MS in Speech-Language Pathology, University of Washington',
+    languages: ['English', 'French'],
+    consultationFee: '$140',
+    availableToday: true,
+    nextAvailable: 'Today at 2:30 PM',
+    image: 'https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=400&h=400&fit=crop&crop=face',
+    verified: true,
+    telehealth: true,
+    inPerson: false
   },
   {
-    id: "6",
-    name: "Dr. Robert Taylor",
-    title: "Occupational Therapist",
-    specialties: ["Sensory Integration", "Fine Motor Skills", "Self-Regulation"],
-    experience: "14+ years",
-    education: "OTD in Occupational Therapy",
-    photo: "https://api.dicebear.com/7.x/avataaars/svg?seed=Robert&backgroundColor=b6e3f4",
-    availability: "Tue, Thu, Sat",
-    location: "Berkeley, CA",
-    bio: "Dr. Taylor helps children develop the skills needed for success in daily activities. He specializes in sensory processing issues and creates personalized treatment plans to improve functional independence."
+    id: '6',
+    name: 'Dr. David Kumar',
+    title: 'Pediatric Psychiatrist',
+    specialties: ['ADHD Medication', 'Anxiety Disorders', 'Mood Disorders', 'Medication Management'],
+    rating: 4.6,
+    reviewCount: 76,
+    location: 'Boston, MA',
+    experience: '18 years experience',
+    education: 'MD from Johns Hopkins, Residency in Child Psychiatry',
+    languages: ['English', 'Hindi'],
+    consultationFee: '$220',
+    availableToday: false,
+    nextAvailable: 'Wednesday at 11:00 AM',
+    image: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=400&h=400&fit=crop&crop=face',
+    verified: true,
+    telehealth: true,
+    inPerson: true
   }
 ];
 
-interface ProfessionalDirectoryProps {
-  compact?: boolean;
-}
+const ProfessionalDirectory = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedSpecialty, setSelectedSpecialty] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState('');
+  const [showAvailableOnly, setShowAvailableOnly] = useState(false);
 
-const ProfessionalDirectory: React.FC<ProfessionalDirectoryProps> = ({ compact = false }) => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [specialtyFilter, setSpecialtyFilter] = useState<string>("all");
-  const [locationFilter, setLocationFilter] = useState<string>("all");
-  
-  // Extract all unique specialties for filter
-  const allSpecialties = Array.from(
-    new Set(PROFESSIONALS.flatMap(pro => pro.specialties))
+  const specialties = Array.from(
+    new Set(professionals.flatMap(p => p.specialties))
   ).sort();
-  
-  // Extract all unique locations for filter
-  const allLocations = Array.from(
-    new Set(PROFESSIONALS.map(pro => pro.location.split(',')[1]?.trim() || pro.location))
+
+  const locations = Array.from(
+    new Set(professionals.map(p => p.location))
   ).sort();
-  
-  // Filter professionals based on search and filters
-  const filteredProfessionals = PROFESSIONALS.filter(pro => {
-    const matchesSearch = 
-      pro.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      pro.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      pro.bio.toLowerCase().includes(searchTerm.toLowerCase());
-      
-    const matchesSpecialty = 
-      specialtyFilter === "all" || 
-      pro.specialties.includes(specialtyFilter);
-      
-    const matchesLocation =
-      locationFilter === "all" ||
-      pro.location.includes(locationFilter);
-      
-    return matchesSearch && matchesSpecialty && matchesLocation;
+
+  const filteredProfessionals = professionals.filter(professional => {
+    const matchesSearch = professional.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         professional.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         professional.specialties.some(s => s.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    const matchesSpecialty = !selectedSpecialty || professional.specialties.includes(selectedSpecialty);
+    const matchesLocation = !selectedLocation || professional.location === selectedLocation;
+    const matchesAvailability = !showAvailableOnly || professional.availableToday;
+
+    return matchesSearch && matchesSpecialty && matchesLocation && matchesAvailability;
   });
 
+  const handleBookAppointment = (professional: any) => {
+    // Handle appointment booking
+    console.log('Booking appointment with:', professional.name);
+  };
+
   return (
-    <div className="space-y-8">
-      <div className="bg-muted/30 p-6 rounded-lg">
-        <h2 className="text-2xl font-bold mb-5">Find a Specialist</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="space-y-6">
+      {/* Search and Filters */}
+      <div className="bg-card p-6 rounded-lg border">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           <div className="relative">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by name or specialty..."
+              placeholder="Search professionals..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 bg-white"
+              className="pl-10"
             />
           </div>
           
-          <Select value={specialtyFilter} onValueChange={setSpecialtyFilter}>
-            <SelectTrigger className="bg-white">
-              <SelectValue placeholder="Filter by specialty" />
+          <Select value={selectedSpecialty} onValueChange={setSelectedSpecialty}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select specialty" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Specialties</SelectItem>
-              {allSpecialties.map(specialty => (
+              <SelectItem value="">All Specialties</SelectItem>
+              {specialties.map(specialty => (
                 <SelectItem key={specialty} value={specialty}>
                   {specialty}
                 </SelectItem>
@@ -149,104 +184,67 @@ const ProfessionalDirectory: React.FC<ProfessionalDirectoryProps> = ({ compact =
             </SelectContent>
           </Select>
           
-          <Select value={locationFilter} onValueChange={setLocationFilter}>
-            <SelectTrigger className="bg-white">
-              <SelectValue placeholder="Filter by location" />
+          <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select location" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Locations</SelectItem>
-              {allLocations.map(location => (
+              <SelectItem value="">All Locations</SelectItem>
+              {locations.map(location => (
                 <SelectItem key={location} value={location}>
                   {location}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
+          
+          <Button
+            variant={showAvailableOnly ? "default" : "outline"}
+            onClick={() => setShowAvailableOnly(!showAvailableOnly)}
+            className="w-full"
+          >
+            <Filter className="h-4 w-4 mr-2" />
+            Available Today
+          </Button>
         </div>
         
-        {/* Active filters display */}
-        {(specialtyFilter !== "all" || locationFilter !== "all" || searchTerm) && (
-          <div className="flex flex-wrap gap-2 mt-4">
-            {searchTerm && (
-              <Badge variant="secondary" className="flex items-center gap-1">
-                Search: {searchTerm}
-                <button 
-                  onClick={() => setSearchTerm("")}
-                  className="ml-1 hover:bg-muted/20 rounded-full p-0.5"
-                >
-                  <span className="sr-only">Remove</span>
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                    <path d="M9 3L3 9M3 3L9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                  </svg>
-                </button>
-              </Badge>
-            )}
-            
-            {specialtyFilter !== "all" && (
-              <Badge variant="secondary" className="flex items-center gap-1">
-                Specialty: {specialtyFilter}
-                <button 
-                  onClick={() => setSpecialtyFilter("all")}
-                  className="ml-1 hover:bg-muted/20 rounded-full p-0.5"
-                >
-                  <span className="sr-only">Remove</span>
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                    <path d="M9 3L3 9M3 3L9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                  </svg>
-                </button>
-              </Badge>
-            )}
-            
-            {locationFilter !== "all" && (
-              <Badge variant="secondary" className="flex items-center gap-1">
-                Location: {locationFilter}
-                <button 
-                  onClick={() => setLocationFilter("all")}
-                  className="ml-1 hover:bg-muted/20 rounded-full p-0.5"
-                >
-                  <span className="sr-only">Remove</span>
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                    <path d="M9 3L3 9M3 3L9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                  </svg>
-                </button>
-              </Badge>
-            )}
-            
-            {(specialtyFilter !== "all" || locationFilter !== "all" || searchTerm) && (
-              <button 
-                onClick={() => {
-                  setSearchTerm("");
-                  setSpecialtyFilter("all");
-                  setLocationFilter("all");
-                }}
-                className="text-xs text-muted-foreground hover:text-foreground underline ml-2"
-              >
-                Clear all filters
-              </button>
-            )}
-          </div>
-        )}
-      </div>
-      
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Our Specialists {filteredProfessionals.length > 0 && <span className="text-sm font-medium text-muted-foreground">({filteredProfessionals.length} found)</span>}</h2>
-      </div>
-      
-      {filteredProfessionals.length === 0 ? (
-        <div className="text-center py-16 bg-muted/20 rounded-lg">
-          <UserRound className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-          <h3 className="text-lg font-medium">No specialists found</h3>
-          <p className="text-muted-foreground mt-2 max-w-md mx-auto">We couldn't find any specialists matching your search criteria. Please try adjusting your filters or search terms.</p>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <span>Showing {filteredProfessionals.length} of {professionals.length} professionals</span>
+          {(searchTerm || selectedSpecialty || selectedLocation || showAvailableOnly) && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSearchTerm('');
+                setSelectedSpecialty('');
+                setSelectedLocation('');
+                setShowAvailableOnly(false);
+              }}
+            >
+              Clear filters
+            </Button>
+          )}
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProfessionals.map(professional => (
-            <ProfessionalCard 
-              key={professional.id} 
-              professional={professional} 
-              compact={compact} 
-            />
-          ))}
+      </div>
+
+      {/* Professional Cards Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {filteredProfessionals.map(professional => (
+          <ProfessionalCard
+            key={professional.id}
+            professional={professional}
+            onBookAppointment={handleBookAppointment}
+          />
+        ))}
+      </div>
+
+      {filteredProfessionals.length === 0 && (
+        <div className="text-center py-12">
+          <div className="text-muted-foreground mb-4">
+            <MapPin className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <p className="text-lg">No professionals found</p>
+            <p>Try adjusting your search criteria</p>
+          </div>
         </div>
       )}
     </div>
