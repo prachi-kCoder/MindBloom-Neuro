@@ -5,21 +5,22 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useNavigate } from 'react-router-dom';
 import ProfessionalCard from './ProfessionalCard';
 
 const professionals = [
   {
     id: '1',
     name: 'Dr. Sarah Johnson',
-    title: 'Pediatric Developmental Specialist',
-    specialties: ['Dyslexia Assessment', 'ADHD Evaluation', 'Learning Disabilities', 'Behavioral Therapy'],
+    title: 'Child Psychologist',
+    specialties: ['ADHD', 'Anxiety', 'Behavioral Issues'],
     rating: 4.9,
     reviewCount: 127,
-    location: 'New York, NY',
-    experience: '12 years experience',
-    education: 'MD from Harvard Medical School, PhD in Developmental Psychology',
+    location: 'San Francisco, CA',
+    experience: '15+ years',
+    education: 'Ph.D. in Clinical Psychology from Stanford University',
     languages: ['English', 'Spanish'],
-    consultationFee: '$180',
+    consultationFee: '$250',
     availableToday: true,
     nextAvailable: 'Today at 3:00 PM',
     image: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=400&fit=crop&crop=face',
@@ -30,15 +31,15 @@ const professionals = [
   {
     id: '2',
     name: 'Dr. Michael Chen',
-    title: 'Child Neuropsychologist',
-    specialties: ['Autism Spectrum Disorders', 'ADHD', 'Executive Function', 'Memory Assessment'],
+    title: 'Developmental Pediatrician',
+    specialties: ['ASD', 'Developmental Delays', 'Sensory Processing'],
     rating: 4.8,
     reviewCount: 98,
-    location: 'Los Angeles, CA',
-    experience: '15 years experience',
-    education: 'PhD in Clinical Psychology, UCLA School of Medicine',
+    location: 'San Francisco, CA',
+    experience: '12+ years',
+    education: 'M.D., Fellowship in Developmental Pediatrics from UCSF',
     languages: ['English', 'Mandarin'],
-    consultationFee: '$200',
+    consultationFee: '$280',
     availableToday: false,
     nextAvailable: 'Tomorrow at 10:00 AM',
     image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&h=400&fit=crop&crop=face',
@@ -50,14 +51,14 @@ const professionals = [
     id: '3',
     name: 'Dr. Emily Rodriguez',
     title: 'Educational Psychologist',
-    specialties: ['Learning Assessments', 'IEP Planning', 'School Accommodations', 'Study Skills'],
+    specialties: ['Dyslexia', 'Learning Disabilities', 'Gifted Assessment'],
     rating: 4.7,
     reviewCount: 156,
-    location: 'Chicago, IL',
-    experience: '10 years experience',
-    education: 'EdD in Educational Psychology, Teachers College Columbia',
+    location: 'Oakland, CA',
+    experience: '10+ years',
+    education: 'Ed.D. in Educational Psychology from UC Berkeley',
     languages: ['English', 'Spanish', 'Portuguese'],
-    consultationFee: '$150',
+    consultationFee: '$220',
     availableToday: true,
     nextAvailable: 'Today at 5:00 PM',
     image: 'https://images.unsplash.com/photo-1594824388853-5d78f8b1cb9a?w=400&h=400&fit=crop&crop=face',
@@ -68,15 +69,15 @@ const professionals = [
   {
     id: '4',
     name: 'Dr. James Wilson',
-    title: 'Behavioral Therapist',
-    specialties: ['Applied Behavior Analysis', 'Social Skills Training', 'Autism Support', 'Family Counseling'],
+    title: 'Child Psychiatrist',
+    specialties: ['ADHD', 'Mood Disorders', 'Medication Management'],
     rating: 4.9,
     reviewCount: 89,
-    location: 'Austin, TX',
-    experience: '8 years experience',
-    education: 'PhD in Applied Behavior Analysis, University of Kansas',
+    location: 'Palo Alto, CA',
+    experience: '18+ years',
+    education: 'M.D., Board Certified in Child Psychiatry from Johns Hopkins',
     languages: ['English'],
-    consultationFee: '$160',
+    consultationFee: '$320',
     availableToday: false,
     nextAvailable: 'Monday at 9:00 AM',
     image: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=400&h=400&fit=crop&crop=face',
@@ -88,14 +89,14 @@ const professionals = [
     id: '5',
     name: 'Dr. Lisa Thompson',
     title: 'Speech-Language Pathologist',
-    specialties: ['Language Development', 'Reading Disorders', 'Communication Skills', 'Articulation'],
+    specialties: ['Language Development', 'Reading Disorders', 'Communication Skills'],
     rating: 4.8,
     reviewCount: 134,
-    location: 'Seattle, WA',
-    experience: '14 years experience',
-    education: 'MS in Speech-Language Pathology, University of Washington',
+    location: 'San Jose, CA',
+    experience: '14+ years',
+    education: 'M.S. in Speech-Language Pathology from Northwestern University',
     languages: ['English', 'French'],
-    consultationFee: '$140',
+    consultationFee: '$190',
     availableToday: true,
     nextAvailable: 'Today at 2:30 PM',
     image: 'https://images.unsplash.com/photo-1551836022-deb4988cc6c0?w=400&h=400&fit=crop&crop=face',
@@ -106,15 +107,15 @@ const professionals = [
   {
     id: '6',
     name: 'Dr. David Kumar',
-    title: 'Pediatric Psychiatrist',
-    specialties: ['ADHD Medication', 'Anxiety Disorders', 'Mood Disorders', 'Medication Management'],
+    title: 'Pediatric Neurologist',
+    specialties: ['Autism Spectrum', 'ADHD', 'Learning Disabilities'],
     rating: 4.6,
     reviewCount: 76,
-    location: 'Boston, MA',
-    experience: '18 years experience',
-    education: 'MD from Johns Hopkins, Residency in Child Psychiatry',
+    location: 'Mountain View, CA',
+    experience: '16+ years',
+    education: 'M.D., Ph.D. in Neuroscience from Harvard Medical School',
     languages: ['English', 'Hindi'],
-    consultationFee: '$220',
+    consultationFee: '$300',
     availableToday: false,
     nextAvailable: 'Wednesday at 11:00 AM',
     image: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=400&h=400&fit=crop&crop=face',
@@ -125,9 +126,10 @@ const professionals = [
 ];
 
 const ProfessionalDirectory = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedSpecialty, setSelectedSpecialty] = useState('');
-  const [selectedLocation, setSelectedLocation] = useState('');
+  const [selectedSpecialty, setSelectedSpecialty] = useState('all-specialties');
+  const [selectedLocation, setSelectedLocation] = useState('all-locations');
   const [showAvailableOnly, setShowAvailableOnly] = useState(false);
 
   const specialties = Array.from(
@@ -143,16 +145,15 @@ const ProfessionalDirectory = () => {
                          professional.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          professional.specialties.some(s => s.toLowerCase().includes(searchTerm.toLowerCase()));
     
-    const matchesSpecialty = !selectedSpecialty || professional.specialties.includes(selectedSpecialty);
-    const matchesLocation = !selectedLocation || professional.location === selectedLocation;
+    const matchesSpecialty = selectedSpecialty === 'all-specialties' || professional.specialties.includes(selectedSpecialty);
+    const matchesLocation = selectedLocation === 'all-locations' || professional.location === selectedLocation;
     const matchesAvailability = !showAvailableOnly || professional.availableToday;
 
     return matchesSearch && matchesSpecialty && matchesLocation && matchesAvailability;
   });
 
   const handleBookAppointment = (professional: any) => {
-    // Handle appointment booking
-    console.log('Booking appointment with:', professional.name);
+    navigate(`/appointments/book/${professional.id}`);
   };
 
   return (
@@ -175,7 +176,7 @@ const ProfessionalDirectory = () => {
               <SelectValue placeholder="Select specialty" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Specialties</SelectItem>
+              <SelectItem value="all-specialties">All Specialties</SelectItem>
               {specialties.map(specialty => (
                 <SelectItem key={specialty} value={specialty}>
                   {specialty}
@@ -189,7 +190,7 @@ const ProfessionalDirectory = () => {
               <SelectValue placeholder="Select location" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Locations</SelectItem>
+              <SelectItem value="all-locations">All Locations</SelectItem>
               {locations.map(location => (
                 <SelectItem key={location} value={location}>
                   {location}
@@ -210,14 +211,14 @@ const ProfessionalDirectory = () => {
         
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <span>Showing {filteredProfessionals.length} of {professionals.length} professionals</span>
-          {(searchTerm || selectedSpecialty || selectedLocation || showAvailableOnly) && (
+          {(searchTerm || selectedSpecialty !== 'all-specialties' || selectedLocation !== 'all-locations' || showAvailableOnly) && (
             <Button
               variant="ghost"
               size="sm"
               onClick={() => {
                 setSearchTerm('');
-                setSelectedSpecialty('');
-                setSelectedLocation('');
+                setSelectedSpecialty('all-specialties');
+                setSelectedLocation('all-locations');
                 setShowAvailableOnly(false);
               }}
             >
