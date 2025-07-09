@@ -40,7 +40,7 @@
 
 ## 🧪 Getting Started
 - Clone the repo and get coding:
-|--------------------------------------------------------------|
+
 |git clone https://github.com/prachi-kCoder/MindBloom-Neuro.git|
 |cd MindBloom-Neuro |
 |npm install |
