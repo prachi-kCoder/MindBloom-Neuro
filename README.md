@@ -1,6 +1,6 @@
 # 🌱 MindBloom
 ## Empowering neurodiverse children with inclusive learning tools, adaptive content, and creative expression.
-
+`https://mind-bloom-app-git-main-prachi-kumaris-projects-194ed928.vercel.app/`
 ### 🧠 What is MindBloom?
 - MindBloom is an innovative project designed to support neurodiverse children—especially those navigating ADHD, ASD (Autism Spectrum Disorder), and dyslexia. It provides an accessible platform that adapts to different cognitive needs, helping children learn and grow without fear, judgment, or limitation.
 
