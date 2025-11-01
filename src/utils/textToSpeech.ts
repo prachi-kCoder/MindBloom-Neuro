@@ -26,6 +26,7 @@ interface SpeechOptions {
   rate?: number;
   pitch?: number;
   volume?: number;
+  lang?: string;
   onStart?: () => void;
   onEnd?: () => void;
   onError?: (error: any) => void;
@@ -71,30 +72,30 @@ export function speak(
   speech.rate = options.rate ?? 1.0; // Speed: 0.1 to 10
   speech.pitch = options.pitch ?? 1.0; // Pitch: 0 to 2
   speech.volume = options.volume ?? 1.0; // Volume: 0 to 1
+  speech.lang = options.lang ?? 'en-US'; // Language code
   
   try {
-    // For better voice quality, try to get a female voice (often better for children)
+    // For better voice quality, try to get a voice matching the language
     const voices = window.speechSynthesis.getVoices();
     
     if (voices.length > 0) {
       // Set default voice
       speech.voice = voices[0];
       
-      // Try to find a female English voice
-      const femaleVoice = voices.find(voice => 
-        voice.name.toLowerCase().includes('female') && 
-        voice.lang.includes('en')
+      // Try to find a voice matching the selected language
+      const langVoice = voices.find(voice => 
+        voice.lang.startsWith(options.lang?.split('-')[0] || 'en')
       );
       
-      // As a fallback, any English voice
-      const englishVoice = voices.find(voice => 
-        voice.lang.includes('en')
+      // As a fallback, try to find any voice with the exact lang code
+      const exactLangVoice = voices.find(voice => 
+        voice.lang === (options.lang ?? 'en-US')
       );
       
-      if (femaleVoice) {
-        speech.voice = femaleVoice;
-      } else if (englishVoice) {
-        speech.voice = englishVoice;
+      if (exactLangVoice) {
+        speech.voice = exactLangVoice;
+      } else if (langVoice) {
+        speech.voice = langVoice;
       }
     }
     

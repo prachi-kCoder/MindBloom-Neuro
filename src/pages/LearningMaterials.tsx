@@ -8,7 +8,8 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Slider } from '@/components/ui/slider';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, FileText, Upload, Eye, Headphones, Play, Pause, SkipBack, SkipForward, Save, Loader2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ArrowLeft, FileText, Upload, Eye, Headphones, Play, Pause, SkipBack, SkipForward, Save, Loader2, BookOpen, Languages, Sparkles } from 'lucide-react';
 import useDyslexiaFont from '@/hooks/useDyslexiaFont';
 import { speak, stopSpeaking } from '@/utils/textToSpeech';
 import { AudioRecorder } from '@/components/learning/AudioRecorder';
@@ -49,6 +50,8 @@ const LearningMaterials = () => {
   const [rate, setRate] = useState(0.9);
   const [pitch, setPitch] = useState(1.0);
   const [volume, setVolume] = useState(1.0);
+  const [language, setLanguage] = useState('en-US');
+  const [isAutoPlay, setIsAutoPlay] = useState(true);
   
   const [activeTab, setActiveTab] = useState("upload");
 
@@ -129,8 +132,12 @@ const LearningMaterials = () => {
           reader.onload = (e) => resolve(e.target?.result as string);
           reader.readAsText(file);
         });
+      } else if (fileType.includes("pdf") || fileType.includes("doc") || fileType.includes("docx")) {
+        // For now, show a placeholder for PDF/DOCX (can be enhanced with actual parsing)
+        toast.info('PDF/DOCX parsing coming soon! Showing sample content.');
+        extractedText = `📚 ${materialTitle || fileName}\n\n🌟 Welcome to your learning material!\n\nThis is a preview of your uploaded ${fileName}. The full text extraction for PDF and Word documents is being processed.\n\nYou can use the text-to-speech features below to listen to the content in different languages, adjust speed and pitch to match your learning style.\n\n💡 Try out the audio controls below to customize your learning experience!`;
       } else {
-        extractedText = `Processing ${fileName}...\n\nThis is extracted content from your uploaded file. The content will be read aloud with text-to-speech support.\n\nYou can upload text files (.txt) for actual content extraction, or use this sample text to test the learning features.`;
+        extractedText = `📖 ${materialTitle || fileName}\n\n✨ Learning Material Preview\n\nYour file has been uploaded successfully! Use the text-to-speech controls to listen to content in multiple languages.\n\n🎯 Features:\n• Multi-language support\n• Adjustable speed and pitch\n• Audio assessment recording\n• Progress tracking\n\nStart learning by pressing the play button below!`;
       }
       
       setProcessedText(extractedText);
@@ -258,16 +265,20 @@ const LearningMaterials = () => {
       rate,
       pitch,
       volume,
+      lang: language,
       onStart: () => {
         setIsPlaying(true);
         highlightCurrentSentence();
       },
       onEnd: () => {
-        setIsPlaying(false);
-        if (currentSentence < sentences.length - 1) {
+        if (isAutoPlay && currentSentence < sentences.length - 1) {
+          // Continue to next sentence automatically
           setTimeout(() => {
             setCurrentSentence(prev => prev + 1);
           }, 500);
+        } else {
+          // Stop at the end or if autoplay is disabled
+          setIsPlaying(false);
         }
       }
     });
@@ -300,7 +311,26 @@ const LearningMaterials = () => {
 
   useEffect(() => {
     highlightCurrentSentence();
+    if (isPlaying && isAutoPlay) {
+      // Continue playing when sentence changes
+      speakCurrentSentence();
+    }
   }, [currentSentence, sentences]);
+  
+  const languageOptions = [
+    { value: 'en-US', label: '🇺🇸 English (US)' },
+    { value: 'en-GB', label: '🇬🇧 English (UK)' },
+    { value: 'es-ES', label: '🇪🇸 Spanish' },
+    { value: 'fr-FR', label: '🇫🇷 French' },
+    { value: 'de-DE', label: '🇩🇪 German' },
+    { value: 'it-IT', label: '🇮🇹 Italian' },
+    { value: 'pt-BR', label: '🇧🇷 Portuguese' },
+    { value: 'hi-IN', label: '🇮🇳 Hindi' },
+    { value: 'zh-CN', label: '🇨🇳 Chinese' },
+    { value: 'ja-JP', label: '🇯🇵 Japanese' },
+    { value: 'ko-KR', label: '🇰🇷 Korean' },
+    { value: 'ar-SA', label: '🇸🇦 Arabic' },
+  ];
 
   return (
     <MainLayout>
@@ -411,11 +441,11 @@ const LearningMaterials = () => {
               </Card>
             ) : (
               <>
-                <Card>
-                  <CardHeader>
+                <Card className="border-2 border-primary/20 shadow-lg">
+                  <CardHeader className="bg-gradient-to-r from-primary/10 to-primary/5">
                     <div className="flex items-center justify-between">
                       <CardTitle className="flex items-center gap-2">
-                        <Headphones className="h-5 w-5" />
+                        <Headphones className="h-5 w-5 text-primary" />
                         Audio Controls
                       </CardTitle>
                       <Button onClick={saveMaterial} variant="outline" size="sm">
@@ -424,13 +454,14 @@ const LearningMaterials = () => {
                       </Button>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-6">
+                  <CardContent className="space-y-6 pt-6">
                     <div className="flex items-center justify-center gap-4">
                       <Button 
                         variant="outline" 
                         size="icon"
                         onClick={handlePreviousSentence}
                         disabled={currentSentence === 0}
+                        className="hover:scale-110 transition-transform"
                       >
                         <SkipBack className="h-4 w-4" />
                       </Button>
@@ -438,7 +469,7 @@ const LearningMaterials = () => {
                       <Button 
                         size="lg"
                         onClick={handlePlayPause}
-                        className="h-16 w-16 rounded-full"
+                        className="h-16 w-16 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all"
                       >
                         {isPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6" />}
                       </Button>
@@ -448,39 +479,87 @@ const LearningMaterials = () => {
                         size="icon"
                         onClick={handleNextSentence}
                         disabled={currentSentence === sentences.length - 1}
+                        className="hover:scale-110 transition-transform"
                       >
                         <SkipForward className="h-4 w-4" />
                       </Button>
                     </div>
                     
-                    <Progress value={((currentSentence + 1) / sentences.length) * 100} className="h-2" />
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Progress</span>
+                        <span className="font-medium">{currentSentence + 1} / {sentences.length}</span>
+                      </div>
+                      <Progress value={((currentSentence + 1) / sentences.length) * 100} className="h-3" />
+                    </div>
+
+                    <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg">
+                      <Sparkles className="h-4 w-4 text-primary" />
+                      <label className="text-sm font-medium flex-1">Auto-play continuous reading</label>
+                      <Button
+                        variant={isAutoPlay ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setIsAutoPlay(!isAutoPlay)}
+                      >
+                        {isAutoPlay ? 'ON' : 'OFF'}
+                      </Button>
+                    </div>
+
+                    <div className="space-y-3 p-4 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-lg">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Languages className="h-5 w-5 text-primary" />
+                        <label className="text-sm font-semibold">Language Selection</label>
+                      </div>
+                      <select 
+                        value={language} 
+                        onChange={(e) => setLanguage(e.target.value)}
+                        className="w-full p-2 rounded-md border bg-background text-sm"
+                      >
+                        {languageOptions.map(lang => (
+                          <option key={lang.value} value={lang.value}>{lang.label}</option>
+                        ))}
+                      </select>
+                    </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">Speed: {rate}x</label>
+                        <label className="text-sm font-medium flex items-center gap-2">
+                          🚀 Speed: <span className="text-primary">{rate}x</span>
+                        </label>
                         <Slider value={[rate]} onValueChange={([v]) => setRate(v)} min={0.5} max={2} step={0.1} />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">Pitch: {pitch}</label>
+                        <label className="text-sm font-medium flex items-center gap-2">
+                          🎵 Pitch: <span className="text-primary">{pitch}</span>
+                        </label>
                         <Slider value={[pitch]} onValueChange={([v]) => setPitch(v)} min={0.5} max={2} step={0.1} />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">Volume: {Math.round(volume * 100)}%</label>
+                        <label className="text-sm font-medium flex items-center gap-2">
+                          🔊 Volume: <span className="text-primary">{Math.round(volume * 100)}%</span>
+                        </label>
                         <Slider value={[volume]} onValueChange={([v]) => setVolume(v)} min={0} max={1} step={0.1} />
                       </div>
                     </div>
                   </CardContent>
                 </Card>
                 
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Learning Content</CardTitle>
+                <Card className="border-2 border-primary/10">
+                  <CardHeader className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-950/20 dark:to-blue-950/20">
+                    <CardTitle className="flex items-center gap-2">
+                      <BookOpen className="h-5 w-5 text-primary" />
+                      Learning Content
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div 
                       ref={textDisplayRef}
-                      className={`text-lg leading-relaxed ${useDyslexicFont ? 'font-dyslexic' : ''}`}
-                      style={{ lineHeight: '2.2' }}
+                      className={`prose prose-lg max-w-none p-8 bg-gradient-to-br from-amber-50/50 via-white to-blue-50/50 dark:from-amber-950/10 dark:via-background dark:to-blue-950/10 rounded-xl leading-relaxed shadow-inner border border-primary/5 ${useDyslexicFont ? 'font-dyslexic' : ''}`}
+                      style={{ 
+                        fontSize: '1.2rem', 
+                        lineHeight: '2.2',
+                        textShadow: '0 0 1px rgba(0,0,0,0.1)'
+                      }}
                     />
                   </CardContent>
                 </Card>
