@@ -14,7 +14,80 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      audio_assessments: {
+        Row: {
+          audio_url: string
+          created_at: string
+          duration_seconds: number | null
+          id: string
+          material_id: string | null
+          transcription: string | null
+          user_id: string
+        }
+        Insert: {
+          audio_url: string
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          material_id?: string | null
+          transcription?: string | null
+          user_id: string
+        }
+        Update: {
+          audio_url?: string
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          material_id?: string | null
+          transcription?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audio_assessments_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "learning_materials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learning_materials: {
+        Row: {
+          age_group: string | null
+          content: string
+          created_at: string
+          disability_type: string | null
+          file_type: string | null
+          id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          age_group?: string | null
+          content: string
+          created_at?: string
+          disability_type?: string | null
+          file_type?: string | null
+          id?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          age_group?: string | null
+          content?: string
+          created_at?: string
+          disability_type?: string | null
+          file_type?: string | null
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
