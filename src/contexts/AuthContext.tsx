@@ -1,5 +1,6 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import type { User as SupabaseUser, Session } from '@supabase/supabase-js';
 
 // Define user type
 interface User {
@@ -12,110 +13,114 @@ interface User {
 // Define auth context type
 interface AuthContextType {
   user: User | null;
+  session: Session | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 // Create auth context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock user data
-const MOCK_USERS = [
-  {
-    id: '1',
-    name: 'John Smith',
-    email: 'john@example.com',
-    password: 'password123',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John'
-  },
-  {
-    id: '2',
-    name: 'Sarah Johnson',
-    email: 'sarah@example.com', 
-    password: 'password123',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah'
-  }
-];
+// Helper to convert Supabase user to our User type
+const mapSupabaseUser = (supabaseUser: SupabaseUser | null): User | null => {
+  if (!supabaseUser) return null;
+  return {
+    id: supabaseUser.id,
+    name: supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0] || 'User',
+    email: supabaseUser.email || '',
+    avatar: supabaseUser.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${supabaseUser.email}`
+  };
+};
 
 // Create auth provider
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Check if user is already logged in on mount
   useEffect(() => {
-    const storedUser = localStorage.getItem('mindbloom_user');
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-      } catch (e) {
-        localStorage.removeItem('mindbloom_user');
+    let isMounted = true;
+
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, currentSession) => {
+        if (!isMounted) return;
+        
+        setSession(currentSession);
+        setUser(mapSupabaseUser(currentSession?.user ?? null));
       }
-    }
-    setIsLoading(false);
+    );
+
+    // THEN check initial session
+    const initializeAuth = async () => {
+      try {
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        if (!isMounted) return;
+
+        setSession(currentSession);
+        setUser(mapSupabaseUser(currentSession?.user ?? null));
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    initializeAuth();
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   // Login function
   const login = async (email: string, password: string) => {
-    setIsLoading(true);
-    
-    // Simulate API request delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const foundUser = MOCK_USERS.find(u => u.email === email && u.password === password);
-    
-    if (!foundUser) {
-      setIsLoading(false);
-      throw new Error('Invalid email or password');
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      throw new Error(error.message);
     }
-    
-    const { password: _, ...userWithoutPassword } = foundUser;
-    setUser(userWithoutPassword);
-    localStorage.setItem('mindbloom_user', JSON.stringify(userWithoutPassword));
-    setIsLoading(false);
   };
-  
+
   // Register function
   const register = async (name: string, email: string, password: string) => {
-    setIsLoading(true);
-    
-    // Simulate API request delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Check if user already exists
-    const userExists = MOCK_USERS.some(u => u.email === email);
-    
-    if (userExists) {
-      setIsLoading(false);
-      throw new Error('User with this email already exists');
-    }
-    
-    // Create new user
-    const newUser = {
-      id: `${MOCK_USERS.length + 1}`,
-      name,
+    const { error } = await supabase.auth.signUp({
       email,
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`
-    };
-    
-    setUser(newUser);
-    localStorage.setItem('mindbloom_user', JSON.stringify(newUser));
-    setIsLoading(false);
+      password,
+      options: {
+        data: {
+          full_name: name,
+        },
+        emailRedirectTo: window.location.origin,
+      },
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
   };
-  
+
   // Logout function
-  const logout = () => {
+  const logout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      throw new Error(error.message);
+    }
     setUser(null);
-    localStorage.removeItem('mindbloom_user');
+    setSession(null);
   };
 
   const value = {
     user,
-    isAuthenticated: !!user,
+    session,
+    isAuthenticated: !!session,
     isLoading,
     login,
     register,
