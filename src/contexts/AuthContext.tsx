@@ -31,7 +31,7 @@ const mapSupabaseUser = (supabaseUser: SupabaseUser | null): User | null => {
     id: supabaseUser.id,
     name: supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0] || 'User',
     email: supabaseUser.email || '',
-    avatar: supabaseUser.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${supabaseUser.email}`
+    avatar: supabaseUser.user_metadata?.avatar_url || undefined // Only use real avatar if set
   };
 };
 
