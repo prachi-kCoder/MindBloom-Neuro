@@ -71,13 +71,21 @@ const Profile = () => {
     setIsUpdating(false);
   };
   
-  const handleLogout = () => {
-    logout();
-    toast({
-      title: "Signed out",
-      description: "You have been signed out successfully.",
-    });
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast({
+        title: "Signed out",
+        description: "You have been signed out successfully.",
+      });
+      navigate('/');
+    } catch (error) {
+      toast({
+        title: "Error signing out",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    }
   };
   
   if (!isAuthenticated || !user) {
