@@ -114,8 +114,10 @@ const Profile = () => {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div className="flex items-center gap-4">
                 <Avatar className="h-16 w-16 border-2 border-primary/20">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                  {user.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
+                  <AvatarFallback className="bg-primary/10 text-primary text-xl font-semibold">
+                    {user.name.charAt(0).toUpperCase()}
+                  </AvatarFallback>
                 </Avatar>
                 <div>
                   <h1 className="text-2xl font-bold">{user.name}</h1>
@@ -408,8 +410,10 @@ const Profile = () => {
                         <Label htmlFor="avatar">Profile Picture</Label>
                         <div className="flex items-center gap-4">
                           <Avatar className="h-16 w-16">
-                            <AvatarImage src={user.avatar} />
-                            <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                            {user.avatar && <AvatarImage src={user.avatar} />}
+                            <AvatarFallback className="bg-primary/10 text-primary text-xl font-semibold">
+                              {user.name.charAt(0).toUpperCase()}
+                            </AvatarFallback>
                           </Avatar>
                           <Button type="button" variant="outline" size="sm">
                             Change Picture
