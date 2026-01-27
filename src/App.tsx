@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 
@@ -14,6 +13,7 @@ import Community from "@/pages/Community";
 import Contact from "@/pages/Contact";
 import Login from "@/pages/Login";
 import Profile from "@/pages/Profile";
+import Dashboard from "@/pages/Dashboard";
 import NotFound from "@/pages/NotFound";
 import Learning from "@/pages/Learning";
 import LearningActivity from "@/pages/LearningActivity";
@@ -39,6 +39,7 @@ function App() {
       <Route path="/contact" element={<Contact />} />
       <Route path="/login" element={<Login />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/learning" element={<Learning />} />
       <Route path="/learning/:ageGroup/:activityId" element={<LearningActivity />} />
       <Route path="/learning/materials" element={<LearningMaterials />} />
