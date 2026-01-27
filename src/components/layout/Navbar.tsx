@@ -52,11 +52,13 @@ const Navbar = () => {
             <Button 
               variant="ghost" 
               className="rounded-full p-0 h-10 w-10 overflow-hidden" 
-              onClick={() => navigate('/profile')}
+              onClick={() => navigate('/dashboard')}
             >
               <Avatar>
-                <AvatarImage src={user?.avatar} alt={user?.name} />
-                <AvatarFallback>{user?.name?.charAt(0)}</AvatarFallback>
+                {user?.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
+                <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                  {user?.name?.charAt(0)?.toUpperCase()}
+                </AvatarFallback>
               </Avatar>
             </Button>
           ) : (
@@ -93,8 +95,10 @@ const Navbar = () => {
                   <div className="py-4 border-b">
                     <div className="flex items-center gap-3 px-2">
                       <Avatar>
-                        <AvatarImage src={user?.avatar} alt={user?.name} />
-                        <AvatarFallback>{user?.name?.charAt(0)}</AvatarFallback>
+                        {user?.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
+                        <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                          {user?.name?.charAt(0)?.toUpperCase()}
+                        </AvatarFallback>
                       </Avatar>
                       <div>
                         <p className="font-medium">{user?.name}</p>
@@ -154,11 +158,11 @@ const Navbar = () => {
                     <div className="space-y-2">
                       <Button className="w-full" asChild onClick={() => {
                         setIsMenuOpen(false);
-                        navigate('/profile');
+                        navigate('/dashboard');
                       }}>
-                        <Link to="/profile">
+                        <Link to="/dashboard">
                           <User className="h-4 w-4 mr-2" />
-                          Profile
+                          Dashboard
                         </Link>
                       </Button>
                       <Button variant="outline" className="w-full" onClick={() => {

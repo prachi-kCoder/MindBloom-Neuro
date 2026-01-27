@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -9,22 +8,34 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from '@/contexts/AuthContext';
+import { RoleSelection } from '@/components/auth/RoleSelection';
+import { assignRole, createProfile, type AppRole } from '@/hooks/useUserRole';
 import { LogIn, UserPlus, Loader2, Check } from 'lucide-react';
 
 const Login = () => {
   const [activeTab, setActiveTab] = useState('signin');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [showRoleSelection, setShowRoleSelection] = useState(false);
+  const [registeredUserId, setRegisteredUserId] = useState<string | null>(null);
+  const [registeredUserName, setRegisteredUserName] = useState<string>('');
   const { toast } = useToast();
-  const { login, register, isAuthenticated } = useAuth();
+  const { login, register, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   
-  // Redirect if already logged in
+  // Redirect if already logged in (and not in role selection mode)
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/profile');
+    if (isAuthenticated && !showRoleSelection) {
+      navigate('/dashboard');
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, showRoleSelection]);
+
+  // Update registeredUserId when user becomes available after registration
+  useEffect(() => {
+    if (showRoleSelection && user?.id && !registeredUserId) {
+      setRegisteredUserId(user.id);
+    }
+  }, [user?.id, showRoleSelection, registeredUserId]);
   
   // Sign in form state
   const [signInForm, setSignInForm] = useState({
@@ -78,7 +89,7 @@ const Login = () => {
       });
       
       setTimeout(() => {
-        navigate('/profile');
+        navigate('/dashboard');
       }, 1000);
     } catch (error) {
       toast({
@@ -115,16 +126,16 @@ const Login = () => {
     try {
       setIsSubmitting(true);
       await register(registerForm.name, registerForm.email, registerForm.password);
-      setFormSubmitted(true);
+      setRegisteredUserName(registerForm.name);
       
       toast({
-        title: "Registration successful",
-        description: "Welcome to MindBloom!",
+        title: "Account created!",
+        description: "Now choose your role to get started.",
       });
       
-      setTimeout(() => {
-        navigate('/profile');
-      }, 1000);
+      // Show role selection instead of redirecting
+      setShowRoleSelection(true);
+      setIsSubmitting(false);
     } catch (error) {
       toast({
         title: "Registration failed",
@@ -134,6 +145,81 @@ const Login = () => {
       setIsSubmitting(false);
     }
   };
+
+  // Handle role selection
+  const handleRoleSelect = async (role: AppRole) => {
+    if (!registeredUserId) {
+      toast({
+        title: "Error",
+        description: "User ID not found. Please try again.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Create profile first
+      const profileCreated = await createProfile(registeredUserId, registeredUserName);
+      if (!profileCreated) {
+        console.warn('Profile creation failed, but continuing with role assignment');
+      }
+
+      // Assign role
+      const roleAssigned = await assignRole(registeredUserId, role);
+      if (!roleAssigned) {
+        throw new Error('Failed to assign role');
+      }
+
+      toast({
+        title: "Setup complete!",
+        description: `Welcome to MindBloom as a ${role}!`,
+      });
+
+      setFormSubmitted(true);
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1000);
+    } catch (error) {
+      toast({
+        title: "Setup failed",
+        description: error instanceof Error ? error.message : "Failed to complete setup",
+        variant: "destructive"
+      });
+      setIsSubmitting(false);
+    }
+  };
+
+  // Show role selection screen
+  if (showRoleSelection) {
+    return (
+      <MainLayout>
+        <div className="container py-12 px-4 md:px-6">
+          <div className="max-w-3xl mx-auto">
+            {formSubmitted ? (
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <div className="bg-green-100 dark:bg-green-900/30 rounded-full mx-auto w-16 h-16 flex items-center justify-center mb-4">
+                    <Check className="h-8 w-8 text-green-600 dark:text-green-400" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">Setup Complete!</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Your account has been created successfully.
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Redirecting you to your dashboard...
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <RoleSelection onSelectRole={handleRoleSelect} isLoading={isSubmitting} />
+            )}
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
@@ -161,15 +247,13 @@ const Login = () => {
                     <Check className="h-8 w-8 text-green-600 dark:text-green-400" />
                   </div>
                   <h3 className="text-xl font-semibold mb-2">
-                    {activeTab === 'signin' ? 'Sign In Successful!' : 'Registration Complete!'}
+                    Sign In Successful!
                   </h3>
                   <p className="text-muted-foreground mb-4">
-                    {activeTab === 'signin' 
-                      ? 'Welcome back to MindBloom.' 
-                      : 'Your account has been created successfully.'}
+                    Welcome back to MindBloom.
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Redirecting you to your profile...
+                    Redirecting you to your dashboard...
                   </p>
                 </div>
               ) : activeTab === 'signin' ? (
