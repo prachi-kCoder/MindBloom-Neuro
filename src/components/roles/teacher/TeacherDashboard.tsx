@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, BookOpen, Users, TrendingUp, Edit, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Plus, BookOpen, Users, FileText, Trash2, Edit, Eye, EyeOff, BarChart3 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -24,28 +23,26 @@ interface EducationalContent {
   difficulty_level: string | null;
   is_published: boolean;
   created_at: string;
+  tags: string[] | null;
 }
 
-interface StudentProgress {
+interface StudentProgressItem {
   id: string;
   student_id: string;
   content_id: string;
   progress_percentage: number;
   completed: boolean;
-  educational_content: {
-    title: string;
-  } | null;
+  last_accessed_at: string;
 }
 
-export function EducatorDashboard() {
+export function TeacherDashboard() {
   const { user } = useAuth();
   const [content, setContent] = useState<EducationalContent[]>([]);
-  const [studentProgress, setStudentProgress] = useState<StudentProgress[]>([]);
+  const [studentProgress, setStudentProgress] = useState<StudentProgressItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingContent, setEditingContent] = useState<EducationalContent | null>(null);
-
-  // Form state
+  
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -53,7 +50,7 @@ export function EducatorDashboard() {
     content_type: 'text',
     age_group: '',
     difficulty_level: 'beginner',
-    is_published: false,
+    tags: '',
   });
 
   useEffect(() => {
@@ -63,7 +60,7 @@ export function EducatorDashboard() {
 
   async function fetchContent() {
     if (!user?.id) return;
-    
+
     try {
       const { data, error } = await supabase
         .from('educational_content')
@@ -83,15 +80,11 @@ export function EducatorDashboard() {
 
   async function fetchStudentProgress() {
     if (!user?.id) return;
-    
+
     try {
       const { data, error } = await supabase
         .from('student_progress')
-        .select(`
-          *,
-          educational_content:content_id (title)
-        `)
-        .order('last_accessed_at', { ascending: false });
+        .select('*');
 
       if (error) throw error;
       setStudentProgress(data || []);
@@ -102,10 +95,11 @@ export function EducatorDashboard() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    
     if (!user?.id) return;
 
     try {
+      const tagsArray = formData.tags.split(',').map(t => t.trim()).filter(Boolean);
+      
       if (editingContent) {
         const { error } = await supabase
           .from('educational_content')
@@ -116,7 +110,7 @@ export function EducatorDashboard() {
             content_type: formData.content_type,
             age_group: formData.age_group || null,
             difficulty_level: formData.difficulty_level,
-            is_published: formData.is_published,
+            tags: tagsArray.length > 0 ? tagsArray : null,
           })
           .eq('id', editingContent.id);
 
@@ -133,7 +127,7 @@ export function EducatorDashboard() {
             content_type: formData.content_type,
             age_group: formData.age_group || null,
             difficulty_level: formData.difficulty_level,
-            is_published: formData.is_published,
+            tags: tagsArray.length > 0 ? tagsArray : null,
           });
 
         if (error) throw error;
@@ -149,9 +143,23 @@ export function EducatorDashboard() {
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm('Are you sure you want to delete this content?')) return;
+  async function togglePublish(item: EducationalContent) {
+    try {
+      const { error } = await supabase
+        .from('educational_content')
+        .update({ is_published: !item.is_published })
+        .eq('id', item.id);
 
+      if (error) throw error;
+      toast.success(item.is_published ? 'Content unpublished' : 'Content published');
+      fetchContent();
+    } catch (error) {
+      console.error('Error toggling publish:', error);
+      toast.error('Failed to update content');
+    }
+  }
+
+  async function deleteContent(id: string) {
     try {
       const { error } = await supabase
         .from('educational_content')
@@ -159,41 +167,12 @@ export function EducatorDashboard() {
         .eq('id', id);
 
       if (error) throw error;
-      toast.success('Content deleted successfully');
+      toast.success('Content deleted');
       fetchContent();
     } catch (error) {
       console.error('Error deleting content:', error);
       toast.error('Failed to delete content');
     }
-  }
-
-  async function togglePublish(id: string, currentStatus: boolean) {
-    try {
-      const { error } = await supabase
-        .from('educational_content')
-        .update({ is_published: !currentStatus })
-        .eq('id', id);
-
-      if (error) throw error;
-      toast.success(currentStatus ? 'Content unpublished' : 'Content published');
-      fetchContent();
-    } catch (error) {
-      console.error('Error updating content:', error);
-      toast.error('Failed to update content');
-    }
-  }
-
-  function resetForm() {
-    setFormData({
-      title: '',
-      description: '',
-      content: '',
-      content_type: 'text',
-      age_group: '',
-      difficulty_level: 'beginner',
-      is_published: false,
-    });
-    setEditingContent(null);
   }
 
   function openEditDialog(item: EducationalContent) {
@@ -205,63 +184,80 @@ export function EducatorDashboard() {
       content_type: item.content_type,
       age_group: item.age_group || '',
       difficulty_level: item.difficulty_level || 'beginner',
-      is_published: item.is_published,
+      tags: item.tags?.join(', ') || '',
     });
     setIsDialogOpen(true);
   }
 
+  function resetForm() {
+    setEditingContent(null);
+    setFormData({
+      title: '',
+      description: '',
+      content: '',
+      content_type: 'text',
+      age_group: '',
+      difficulty_level: 'beginner',
+      tags: '',
+    });
+  }
+
   const publishedCount = content.filter(c => c.is_published).length;
   const totalStudents = new Set(studentProgress.map(p => p.student_id)).size;
+  const averageProgress = studentProgress.length > 0
+    ? Math.round(studentProgress.reduce((acc, p) => acc + (p.progress_percentage || 0), 0) / studentProgress.length)
+    : 0;
 
   return (
     <div className="space-y-6">
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
+      {/* Stats Overview */}
+      <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Content</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
+            <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{content.length}</div>
-            <p className="text-xs text-muted-foreground">
-              {publishedCount} published
-            </p>
+            <p className="text-xs text-muted-foreground">Lessons created</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Active Students</CardTitle>
+            <CardTitle className="text-sm font-medium">Published</CardTitle>
+            <BookOpen className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{publishedCount}</div>
+            <p className="text-xs text-muted-foreground">Available to students</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Students</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalStudents}</div>
-            <p className="text-xs text-muted-foreground">
-              Learning from your content
-            </p>
+            <p className="text-xs text-muted-foreground">Active learners</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Avg. Completion</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Avg Progress</CardTitle>
+            <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {studentProgress.length > 0 
-                ? Math.round(studentProgress.reduce((acc, p) => acc + p.progress_percentage, 0) / studentProgress.length)
-                : 0}%
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Across all content
-            </p>
+            <div className="text-2xl font-bold">{averageProgress}%</div>
+            <p className="text-xs text-muted-foreground">Across all content</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Main Content Area */}
+      {/* Content Management */}
       <Tabs defaultValue="content" className="space-y-4">
         <div className="flex justify-between items-center">
           <TabsList>
@@ -283,7 +279,7 @@ export function EducatorDashboard() {
               <DialogHeader>
                 <DialogTitle>{editingContent ? 'Edit Content' : 'Create New Content'}</DialogTitle>
                 <DialogDescription>
-                  Create educational content for students to learn from
+                  {editingContent ? 'Update your educational content' : 'Add new educational content for your students'}
                 </DialogDescription>
               </DialogHeader>
 
@@ -294,7 +290,6 @@ export function EducatorDashboard() {
                     id="title"
                     value={formData.title}
                     onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                    placeholder="Enter content title"
                     required
                   />
                 </div>
@@ -305,24 +300,11 @@ export function EducatorDashboard() {
                     id="description"
                     value={formData.description}
                     onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Brief description of the content"
                     rows={2}
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="content">Content</Label>
-                  <Textarea
-                    id="content"
-                    value={formData.content}
-                    onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-                    placeholder="Main educational content..."
-                    rows={8}
-                    required
-                  />
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-3">
+                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="content_type">Content Type</Label>
                     <Select
@@ -335,8 +317,8 @@ export function EducatorDashboard() {
                       <SelectContent>
                         <SelectItem value="text">Text</SelectItem>
                         <SelectItem value="video">Video</SelectItem>
+                        <SelectItem value="audio">Audio</SelectItem>
                         <SelectItem value="interactive">Interactive</SelectItem>
-                        <SelectItem value="quiz">Quiz</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -358,9 +340,11 @@ export function EducatorDashboard() {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
 
+                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="difficulty">Difficulty</Label>
+                    <Label htmlFor="difficulty_level">Difficulty Level</Label>
                     <Select
                       value={formData.difficulty_level}
                       onValueChange={(value) => setFormData(prev => ({ ...prev, difficulty_level: value }))}
@@ -375,15 +359,27 @@ export function EducatorDashboard() {
                       </SelectContent>
                     </Select>
                   </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="tags">Tags (comma-separated)</Label>
+                    <Input
+                      id="tags"
+                      value={formData.tags}
+                      onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value }))}
+                      placeholder="e.g., reading, phonics"
+                    />
+                  </div>
                 </div>
 
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="publish"
-                    checked={formData.is_published}
-                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_published: checked }))}
+                <div className="space-y-2">
+                  <Label htmlFor="content">Content</Label>
+                  <Textarea
+                    id="content"
+                    value={formData.content}
+                    onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
+                    rows={8}
+                    required
                   />
-                  <Label htmlFor="publish">Publish immediately</Label>
                 </div>
 
                 <div className="flex justify-end gap-2">
@@ -417,66 +413,37 @@ export function EducatorDashboard() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {content.map((item) => (
                 <Card key={item.id}>
                   <CardHeader className="pb-2">
                     <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle className="text-lg">{item.title}</CardTitle>
-                        {item.description && (
-                          <CardDescription className="mt-1">{item.description}</CardDescription>
-                        )}
-                      </div>
+                      <CardTitle className="text-lg">{item.title}</CardTitle>
                       <Badge variant={item.is_published ? 'default' : 'secondary'}>
                         {item.is_published ? 'Published' : 'Draft'}
                       </Badge>
                     </div>
+                    {item.description && (
+                      <CardDescription className="line-clamp-2">{item.description}</CardDescription>
+                    )}
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {item.age_group && (
-                        <Badge variant="outline">{item.age_group}</Badge>
-                      )}
-                      {item.difficulty_level && (
-                        <Badge variant="outline">{item.difficulty_level}</Badge>
-                      )}
+                      {item.age_group && <Badge variant="outline">{item.age_group}</Badge>}
+                      {item.difficulty_level && <Badge variant="outline">{item.difficulty_level}</Badge>}
                       <Badge variant="outline">{item.content_type}</Badge>
                     </div>
                     <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => togglePublish(item.id, item.is_published)}
-                      >
-                        {item.is_published ? (
-                          <>
-                            <EyeOff className="h-4 w-4 mr-1" />
-                            Unpublish
-                          </>
-                        ) : (
-                          <>
-                            <Eye className="h-4 w-4 mr-1" />
-                            Publish
-                          </>
-                        )}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => openEditDialog(item)}
-                      >
-                        <Edit className="h-4 w-4 mr-1" />
+                      <Button size="sm" variant="outline" onClick={() => openEditDialog(item)}>
+                        <Edit className="h-3 w-3 mr-1" />
                         Edit
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDelete(item.id)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4 mr-1" />
-                        Delete
+                      <Button size="sm" variant="outline" onClick={() => togglePublish(item)}>
+                        {item.is_published ? <EyeOff className="h-3 w-3 mr-1" /> : <Eye className="h-3 w-3 mr-1" />}
+                        {item.is_published ? 'Hide' : 'Publish'}
+                      </Button>
+                      <Button size="sm" variant="destructive" onClick={() => deleteContent(item.id)}>
+                        <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
                   </CardContent>
@@ -486,31 +453,33 @@ export function EducatorDashboard() {
           )}
         </TabsContent>
 
-        <TabsContent value="progress">
+        <TabsContent value="progress" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Student Progress</CardTitle>
-              <CardDescription>
-                Track how students are engaging with your content
-              </CardDescription>
+              <CardTitle>Student Progress Overview</CardTitle>
+              <CardDescription>Track how students are engaging with your content</CardDescription>
             </CardHeader>
             <CardContent>
               {studentProgress.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">
-                  No student progress data yet. Students will appear here once they start learning from your published content.
-                </p>
+                <div className="text-center py-8">
+                  <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium mb-2">No student activity yet</h3>
+                  <p className="text-muted-foreground">
+                    When students start learning, their progress will appear here
+                  </p>
+                </div>
               ) : (
                 <div className="space-y-4">
                   {studentProgress.map((progress) => (
                     <div key={progress.id} className="flex items-center justify-between p-4 border rounded-lg">
                       <div>
-                        <p className="font-medium">{progress.educational_content?.title}</p>
+                        <p className="font-medium">Student ID: {progress.student_id.slice(0, 8)}...</p>
                         <p className="text-sm text-muted-foreground">
-                          Student ID: {progress.student_id.slice(0, 8)}...
+                          Last accessed: {new Date(progress.last_accessed_at).toLocaleDateString()}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium">{progress.progress_percentage}%</p>
+                        <p className="font-bold">{progress.progress_percentage}%</p>
                         <Badge variant={progress.completed ? 'default' : 'secondary'}>
                           {progress.completed ? 'Completed' : 'In Progress'}
                         </Badge>

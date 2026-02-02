@@ -1,21 +1,21 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import MainLayout from '@/components/layout/MainLayout';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
-import { EducatorDashboard } from '@/components/dashboard/EducatorDashboard';
-import { StudentDashboard } from '@/components/dashboard/StudentDashboard';
+import { DashboardLayout } from '@/components/roles/DashboardLayout';
+import { TeacherDashboard } from '@/components/roles/teacher/TeacherDashboard';
+import { LearnerDashboard } from '@/components/roles/learner/LearnerDashboard';
+import { ParentDashboard } from '@/components/roles/parent/ParentDashboard';
 import { RoleSelection } from '@/components/auth/RoleSelection';
 import { assignRole, createProfile, type AppRole } from '@/hooks/useUserRole';
 import { toast } from 'sonner';
+import MainLayout from '@/components/layout/MainLayout';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
-  const { role, isLoading: isRoleLoading, isEducator, isStudent, isParent, hasRole } = useUserRole();
+  const { isLoading: isRoleLoading, isEducator, isStudent, isParent, hasRole } = useUserRole();
   const [isAssigningRole, setIsAssigningRole] = React.useState(false);
 
   // Redirect to login if not authenticated
@@ -77,40 +77,28 @@ const Dashboard = () => {
     );
   }
 
-  // Render appropriate dashboard based on role
+  // Render appropriate dashboard based on role with role-specific sidebar
   return (
-    <MainLayout>
-      <div className="container py-8 px-4 md:px-6">
-        <div className="mb-6">
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div>
           <h1 className="text-3xl font-bold mb-2">
             {isEducator && 'Educator Dashboard'}
-            {isStudent && 'Student Dashboard'}
+            {isStudent && 'My Learning Journey'}
             {isParent && 'Parent Dashboard'}
           </h1>
           <p className="text-muted-foreground">
             {isEducator && 'Create and manage educational content for your students'}
-            {isStudent && 'Explore learning materials and track your progress'}
+            {isStudent && 'Explore lessons and track your progress'}
             {isParent && "Monitor your child's learning journey"}
           </p>
         </div>
 
-        {isEducator && <EducatorDashboard />}
-        {isStudent && <StudentDashboard />}
-        {isParent && (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <h3 className="text-lg font-medium mb-2">Parent Dashboard Coming Soon</h3>
-              <p className="text-muted-foreground mb-4">
-                We're working on features to help you monitor your child's progress.
-              </p>
-              <Button onClick={() => navigate('/learning')}>
-                Explore Learning Activities
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+        {isEducator && <TeacherDashboard />}
+        {isStudent && <LearnerDashboard />}
+        {isParent && <ParentDashboard />}
       </div>
-    </MainLayout>
+    </DashboardLayout>
   );
 };
 
