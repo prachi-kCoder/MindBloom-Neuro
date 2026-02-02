@@ -3,9 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { BookOpen, Trophy, Clock, Target, Play, CheckCircle } from 'lucide-react';
+import { BookOpen, Trophy, Clock, Target, Play, CheckCircle, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -30,7 +29,7 @@ interface StudentProgress {
   notes: string | null;
 }
 
-export function StudentDashboard() {
+export function LearnerDashboard() {
   const { user } = useAuth();
   const [content, setContent] = useState<EducationalContent[]>([]);
   const [progress, setProgress] = useState<Map<string, StudentProgress>>(new Map());
@@ -38,6 +37,7 @@ export function StudentDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [filterAgeGroup, setFilterAgeGroup] = useState<string>('all');
   const [filterDifficulty, setFilterDifficulty] = useState<string>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'in-progress' | 'completed'>('all');
 
   useEffect(() => {
     fetchContent();
@@ -147,15 +147,31 @@ export function StudentDashboard() {
     return true;
   });
 
+  const getTabContent = () => {
+    switch (activeTab) {
+      case 'in-progress':
+        return filteredContent.filter(c => {
+          const p = progress.get(c.id);
+          return p && !p.completed && p.progress_percentage > 0;
+        });
+      case 'completed':
+        return filteredContent.filter(c => progress.get(c.id)?.completed);
+      default:
+        return filteredContent;
+    }
+  };
+
   const completedCount = Array.from(progress.values()).filter(p => p.completed).length;
   const inProgressCount = Array.from(progress.values()).filter(p => !p.completed && p.progress_percentage > 0).length;
 
+  // Content viewer
   if (selectedContent) {
     const currentProgress = progress.get(selectedContent.id);
     return (
       <div className="space-y-6">
         <Button variant="outline" onClick={() => setSelectedContent(null)}>
-          ← Back to Content
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Lessons
         </Button>
 
         <Card>
@@ -274,134 +290,130 @@ export function StudentDashboard() {
         </Card>
       </div>
 
-      {/* Content List */}
-      <Tabs defaultValue="all" className="space-y-4">
-        <div className="flex flex-col sm:flex-row justify-between gap-4">
-          <TabsList>
-            <TabsTrigger value="all">All Content</TabsTrigger>
-            <TabsTrigger value="in-progress">In Progress</TabsTrigger>
-            <TabsTrigger value="completed">Completed</TabsTrigger>
-          </TabsList>
-
-          <div className="flex gap-2">
-            <Select value={filterAgeGroup} onValueChange={setFilterAgeGroup}>
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder="Age Group" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Ages</SelectItem>
-                <SelectItem value="3-5">3-5 years</SelectItem>
-                <SelectItem value="6-8">6-8 years</SelectItem>
-                <SelectItem value="9-12">9-12 years</SelectItem>
-                <SelectItem value="13+">13+ years</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={filterDifficulty} onValueChange={setFilterDifficulty}>
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder="Difficulty" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Levels</SelectItem>
-                <SelectItem value="beginner">Beginner</SelectItem>
-                <SelectItem value="intermediate">Intermediate</SelectItem>
-                <SelectItem value="advanced">Advanced</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+      {/* Tabs and Filters */}
+      <div className="flex flex-col sm:flex-row justify-between gap-4">
+        <div className="flex gap-2">
+          <Button 
+            variant={activeTab === 'all' ? 'default' : 'outline'} 
+            size="sm"
+            onClick={() => setActiveTab('all')}
+          >
+            All Content
+          </Button>
+          <Button 
+            variant={activeTab === 'in-progress' ? 'default' : 'outline'} 
+            size="sm"
+            onClick={() => setActiveTab('in-progress')}
+          >
+            In Progress
+          </Button>
+          <Button 
+            variant={activeTab === 'completed' ? 'default' : 'outline'} 
+            size="sm"
+            onClick={() => setActiveTab('completed')}
+          >
+            Completed
+          </Button>
         </div>
 
-        <TabsContent value="all" className="space-y-4">
-          {renderContentList(filteredContent)}
-        </TabsContent>
+        <div className="flex gap-2">
+          <Select value={filterAgeGroup} onValueChange={setFilterAgeGroup}>
+            <SelectTrigger className="w-32">
+              <SelectValue placeholder="Age Group" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Ages</SelectItem>
+              <SelectItem value="3-5">3-5 years</SelectItem>
+              <SelectItem value="6-8">6-8 years</SelectItem>
+              <SelectItem value="9-12">9-12 years</SelectItem>
+              <SelectItem value="13+">13+ years</SelectItem>
+            </SelectContent>
+          </Select>
 
-        <TabsContent value="in-progress" className="space-y-4">
-          {renderContentList(filteredContent.filter(c => {
-            const p = progress.get(c.id);
-            return p && !p.completed && p.progress_percentage > 0;
-          }))}
-        </TabsContent>
+          <Select value={filterDifficulty} onValueChange={setFilterDifficulty}>
+            <SelectTrigger className="w-32">
+              <SelectValue placeholder="Difficulty" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Levels</SelectItem>
+              <SelectItem value="beginner">Beginner</SelectItem>
+              <SelectItem value="intermediate">Intermediate</SelectItem>
+              <SelectItem value="advanced">Advanced</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
 
-        <TabsContent value="completed" className="space-y-4">
-          {renderContentList(filteredContent.filter(c => progress.get(c.id)?.completed))}
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
-
-  function renderContentList(items: EducationalContent[]) {
-    if (isLoading) {
-      return <div className="text-center py-8">Loading content...</div>;
-    }
-
-    if (items.length === 0) {
-      return (
+      {/* Content Grid */}
+      {isLoading ? (
+        <div className="text-center py-8">Loading lessons...</div>
+      ) : getTabContent().length === 0 ? (
         <Card>
           <CardContent className="text-center py-12">
             <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">No content available</h3>
+            <h3 className="text-lg font-medium mb-2">No lessons found</h3>
             <p className="text-muted-foreground">
-              Check back later for new learning materials
+              {activeTab === 'all' ? 'Check back later for new learning materials' : 
+               activeTab === 'in-progress' ? 'Start a lesson to see it here' :
+               'Complete a lesson to see it here'}
             </p>
           </CardContent>
         </Card>
-      );
-    }
-
-    return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {items.map((item) => {
-          const itemProgress = progress.get(item.id);
-          return (
-            <Card key={item.id} className="flex flex-col">
-              <CardHeader className="pb-2">
-                <div className="flex justify-between items-start">
-                  <CardTitle className="text-lg">{item.title}</CardTitle>
-                  {itemProgress?.completed && (
-                    <CheckCircle className="h-5 w-5 text-green-600" />
-                  )}
-                </div>
-                {item.description && (
-                  <CardDescription className="line-clamp-2">
-                    {item.description}
-                  </CardDescription>
-                )}
-              </CardHeader>
-              <CardContent className="flex-1 flex flex-col">
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {item.age_group && (
-                    <Badge variant="outline">{item.age_group}</Badge>
-                  )}
-                  {item.difficulty_level && (
-                    <Badge variant="outline">{item.difficulty_level}</Badge>
-                  )}
-                  <Badge variant="outline">{item.content_type}</Badge>
-                </div>
-
-                {itemProgress && itemProgress.progress_percentage > 0 && (
-                  <div className="mb-4">
-                    <div className="flex justify-between mb-1">
-                      <span className="text-xs text-muted-foreground">Progress</span>
-                      <span className="text-xs text-muted-foreground">
-                        {itemProgress.progress_percentage}%
-                      </span>
-                    </div>
-                    <Progress value={itemProgress.progress_percentage} className="h-2" />
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {getTabContent().map((item) => {
+            const itemProgress = progress.get(item.id);
+            return (
+              <Card key={item.id} className="flex flex-col">
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-start">
+                    <CardTitle className="text-lg">{item.title}</CardTitle>
+                    {itemProgress?.completed && (
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                    )}
                   </div>
-                )}
+                  {item.description && (
+                    <CardDescription className="line-clamp-2">
+                      {item.description}
+                    </CardDescription>
+                  )}
+                </CardHeader>
+                <CardContent className="flex-1 flex flex-col">
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {item.age_group && (
+                      <Badge variant="outline">{item.age_group}</Badge>
+                    )}
+                    {item.difficulty_level && (
+                      <Badge variant="outline">{item.difficulty_level}</Badge>
+                    )}
+                    <Badge variant="outline">{item.content_type}</Badge>
+                  </div>
 
-                <Button 
-                  className="mt-auto" 
-                  onClick={() => startOrContinueContent(item)}
-                >
-                  <Play className="h-4 w-4 mr-2" />
-                  {itemProgress?.progress_percentage ? 'Continue' : 'Start Learning'}
-                </Button>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-    );
-  }
+                  {itemProgress && itemProgress.progress_percentage > 0 && (
+                    <div className="mb-4">
+                      <div className="flex justify-between mb-1">
+                        <span className="text-xs text-muted-foreground">Progress</span>
+                        <span className="text-xs text-muted-foreground">
+                          {itemProgress.progress_percentage}%
+                        </span>
+                      </div>
+                      <Progress value={itemProgress.progress_percentage} className="h-2" />
+                    </div>
+                  )}
+
+                  <Button 
+                    className="mt-auto" 
+                    onClick={() => startOrContinueContent(item)}
+                  >
+                    <Play className="h-4 w-4 mr-2" />
+                    {itemProgress?.progress_percentage ? 'Continue' : 'Start Learning'}
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
 }
