@@ -3,39 +3,29 @@ import { useNavigate, Link } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from '@/contexts/AuthContext';
-import { RoleSelection } from '@/components/auth/RoleSelection';
-import { assignRole, createProfile, type AppRole } from '@/hooks/useUserRole';
 import { LogIn, UserPlus, Loader2, Check } from 'lucide-react';
+
+type SuccessMode = 'signin' | 'signup' | null;
 
 const Login = () => {
   const [activeTab, setActiveTab] = useState('signin');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formSubmitted, setFormSubmitted] = useState(false);
-  const [showRoleSelection, setShowRoleSelection] = useState(false);
-  const [registeredUserId, setRegisteredUserId] = useState<string | null>(null);
-  const [registeredUserName, setRegisteredUserName] = useState<string>('');
+  const [successMode, setSuccessMode] = useState<SuccessMode>(null);
   const { toast } = useToast();
-  const { login, register, isAuthenticated, user } = useAuth();
+  const { login, register, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   
-  // Redirect if already logged in (and not in role selection mode)
+  // Redirect if already logged in
   useEffect(() => {
-    if (isAuthenticated && !showRoleSelection) {
+    if (isAuthenticated) {
       navigate('/dashboard');
     }
-  }, [isAuthenticated, navigate, showRoleSelection]);
-
-  // Update registeredUserId when user becomes available after registration
-  useEffect(() => {
-    if (showRoleSelection && user?.id && !registeredUserId) {
-      setRegisteredUserId(user.id);
-    }
-  }, [user?.id, showRoleSelection, registeredUserId]);
+  }, [isAuthenticated, navigate]);
   
   // Sign in form state
   const [signInForm, setSignInForm] = useState({
@@ -81,7 +71,7 @@ const Login = () => {
     try {
       setIsSubmitting(true);
       await login(signInForm.email, signInForm.password);
-      setFormSubmitted(true);
+      setSuccessMode('signin');
       
       toast({
         title: "Sign in successful",
@@ -126,16 +116,18 @@ const Login = () => {
     try {
       setIsSubmitting(true);
       await register(registerForm.name, registerForm.email, registerForm.password);
-      setRegisteredUserName(registerForm.name);
-      
-      toast({
-        title: "Account created!",
-        description: "Now choose your role to get started.",
-      });
-      
-      // Show role selection instead of redirecting
-      setShowRoleSelection(true);
+
+      // In email-verified signup flows, the user is typically not signed-in immediately.
+      // So we show a "check your email" success screen and let them sign in after verifying.
+      setSuccessMode('signup');
       setIsSubmitting(false);
+
+      toast({
+        title: "Account created",
+        description: "Please check your email to verify your account, then sign in.",
+      });
+
+      setActiveTab('signin');
     } catch (error) {
       toast({
         title: "Registration failed",
@@ -145,81 +137,6 @@ const Login = () => {
       setIsSubmitting(false);
     }
   };
-
-  // Handle role selection
-  const handleRoleSelect = async (role: AppRole) => {
-    if (!registeredUserId) {
-      toast({
-        title: "Error",
-        description: "User ID not found. Please try again.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      // Create profile first
-      const profileCreated = await createProfile(registeredUserId, registeredUserName);
-      if (!profileCreated) {
-        console.warn('Profile creation failed, but continuing with role assignment');
-      }
-
-      // Assign role
-      const roleAssigned = await assignRole(registeredUserId, role);
-      if (!roleAssigned) {
-        throw new Error('Failed to assign role');
-      }
-
-      toast({
-        title: "Setup complete!",
-        description: `Welcome to MindBloom as a ${role}!`,
-      });
-
-      setFormSubmitted(true);
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 1000);
-    } catch (error) {
-      toast({
-        title: "Setup failed",
-        description: error instanceof Error ? error.message : "Failed to complete setup",
-        variant: "destructive"
-      });
-      setIsSubmitting(false);
-    }
-  };
-
-  // Show role selection screen
-  if (showRoleSelection) {
-    return (
-      <MainLayout>
-        <div className="container py-12 px-4 md:px-6">
-          <div className="max-w-3xl mx-auto">
-            {formSubmitted ? (
-              <Card>
-                <CardContent className="py-12 text-center">
-                  <div className="bg-green-100 dark:bg-green-900/30 rounded-full mx-auto w-16 h-16 flex items-center justify-center mb-4">
-                    <Check className="h-8 w-8 text-green-600 dark:text-green-400" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">Setup Complete!</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Your account has been created successfully.
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Redirecting you to your dashboard...
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
-              <RoleSelection onSelectRole={handleRoleSelect} isLoading={isSubmitting} />
-            )}
-          </div>
-        </div>
-      </MainLayout>
-    );
-  }
 
   return (
     <MainLayout>
@@ -241,7 +158,7 @@ const Login = () => {
             </CardHeader>
             
             <CardContent>
-              {formSubmitted ? (
+              {successMode === 'signin' ? (
                 <div className="py-8 text-center">
                   <div className="bg-green-100 dark:bg-green-900/30 rounded-full mx-auto w-16 h-16 flex items-center justify-center mb-4">
                     <Check className="h-8 w-8 text-green-600 dark:text-green-400" />
@@ -255,6 +172,26 @@ const Login = () => {
                   <p className="text-sm text-muted-foreground">
                     Redirecting you to your dashboard...
                   </p>
+                </div>
+              ) : successMode === 'signup' ? (
+                <div className="py-8 text-center">
+                  <div className="bg-primary/10 rounded-full mx-auto w-16 h-16 flex items-center justify-center mb-4">
+                    <Check className="h-8 w-8 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">Verify your email</h3>
+                  <p className="text-muted-foreground mb-4">
+                    We’ve sent you a verification link. Open it to activate your account, then come back and sign in.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setSuccessMode(null);
+                      setActiveTab('signin');
+                    }}
+                  >
+                    Back to sign in
+                  </Button>
                 </div>
               ) : activeTab === 'signin' ? (
                 <form onSubmit={handleSignInSubmit}>
@@ -419,7 +356,7 @@ const Login = () => {
             </CardContent>
             
             <CardFooter className="flex-col space-y-4 border-t pt-4">
-              {!formSubmitted && (
+              {!successMode && (
                 <div className="text-center text-sm">
                   {activeTab === 'signin' ? (
                     <p>

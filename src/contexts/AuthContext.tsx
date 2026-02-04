@@ -98,7 +98,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         data: {
           full_name: name,
         },
-        emailRedirectTo: window.location.origin,
+        // After email verification, bring the user back to the app where they can pick a role
+        emailRedirectTo: `${window.location.origin}/dashboard`,
       },
     });
 
