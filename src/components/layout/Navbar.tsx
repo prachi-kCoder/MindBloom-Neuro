@@ -3,8 +3,16 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Info, Menu, User, X } from "lucide-react";
+import { Info, LayoutDashboard, LogOut, Menu, User, X } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useAuth } from '@/contexts/AuthContext';
 
 const Navbar = () => {
@@ -49,18 +57,48 @@ const Navbar = () => {
           </Button>
           
           {isAuthenticated ? (
-            <Button 
-              variant="ghost" 
-              className="rounded-full p-0 h-10 w-10 overflow-hidden" 
-              onClick={() => navigate('/dashboard')}
-            >
-              <Avatar>
-                {user?.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
-                <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                  {user?.name?.charAt(0)?.toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="rounded-full p-0 h-10 w-10 overflow-hidden"
+                  aria-label="Open user menu"
+                >
+                  <Avatar>
+                    {user?.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
+                    <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                      {user?.name?.charAt(0)?.toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel className="space-y-0.5">
+                  <div className="text-sm font-medium leading-none">{user?.name}</div>
+                  <div className="text-xs text-muted-foreground leading-none">{user?.email}</div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={() => navigate('/dashboard')}>
+                  <LayoutDashboard className="mr-2 h-4 w-4" />
+                  Dashboard
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => navigate('/profile')}>
+                  <User className="mr-2 h-4 w-4" />
+                  Profile
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onSelect={async () => {
+                    await logout();
+                    navigate('/login');
+                  }}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <Button className="rounded-full bg-primary hover:bg-primary/90" asChild>
               <Link to="/login">

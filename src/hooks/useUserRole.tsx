@@ -43,7 +43,9 @@ export function useUserRole() {
         }
 
         setState({
-          role: data?.role as AppRole | null,
+          // IMPORTANT: maybeSingle() returns null/undefined when no row exists.
+          // If we cast undefined, the UI can think the user "hasRole" and render a blank dashboard.
+          role: (data?.role ?? null) as AppRole | null,
           isLoading: false,
           error: null,
         });
@@ -82,6 +84,10 @@ export async function assignRole(userId: string, role: AppRole): Promise<boolean
       .insert({ user_id: userId, role });
 
     if (error) {
+      // If the role was already assigned, treat as success.
+      // (Some schemas enforce uniqueness; users should not get stuck.)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((error as any)?.code === '23505') return true;
       console.error('Error assigning role:', error);
       return false;
     }
@@ -99,6 +105,8 @@ export async function createProfile(userId: string, fullName: string): Promise<b
       .insert({ user_id: userId, full_name: fullName });
 
     if (error) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((error as any)?.code === '23505') return true;
       console.error('Error creating profile:', error);
       return false;
     }
