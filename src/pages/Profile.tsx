@@ -8,8 +8,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 import { Calendar, UserRound, Settings, LogOut, Edit, Mail, Loader2 } from 'lucide-react';
 
 // Mock appointments data (simplified)
@@ -33,7 +33,7 @@ const UPCOMING_APPOINTMENTS = [
 const Profile = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  
   const [isUpdating, setIsUpdating] = useState(false);
   
   // Form state
@@ -64,27 +64,17 @@ const Profile = () => {
     // Simulate API request delay
     await new Promise(resolve => setTimeout(resolve, 1500));
     
-    toast({
-      title: "Profile updated",
-      description: "Your information has been updated successfully.",
-    });
+    toast.success("Your information has been updated successfully.");
     setIsUpdating(false);
   };
   
   const handleLogout = async () => {
     try {
       await logout();
-      toast({
-        title: "Signed out",
-        description: "You have been signed out successfully.",
-      });
+      toast.success("You have been signed out successfully.");
       navigate('/');
     } catch (error) {
-      toast({
-        title: "Error signing out",
-        description: "Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Error signing out. Please try again.");
     }
   };
   
