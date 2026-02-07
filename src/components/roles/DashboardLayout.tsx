@@ -22,12 +22,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
+      <div className="min-h-screen flex w-full bg-background text-foreground">
         {renderSidebar()}
         
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-w-0">
           {/* Mobile header with sidebar trigger */}
-          <header className="h-14 border-b flex items-center px-4 lg:hidden">
+          <header className="h-14 border-b bg-background flex items-center px-4 lg:hidden">
             <SidebarTrigger>
               <Menu className="h-5 w-5" />
             </SidebarTrigger>
@@ -39,7 +39,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </header>
 
           {/* Main content */}
-          <main className="flex-1 p-6 overflow-auto">
+          <main className="flex-1 p-6 overflow-auto bg-background">
             {children}
           </main>
         </div>

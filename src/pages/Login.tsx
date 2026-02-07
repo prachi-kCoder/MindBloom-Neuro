@@ -6,9 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from '@/contexts/AuthContext';
 import { LogIn, UserPlus, Loader2, Check } from 'lucide-react';
+import { toast } from 'sonner';
 
 type SuccessMode = 'signin' | 'signup' | null;
 
@@ -16,7 +16,6 @@ const Login = () => {
   const [activeTab, setActiveTab] = useState('signin');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMode, setSuccessMode] = useState<SuccessMode>(null);
-  const { toast } = useToast();
   const { login, register, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   
@@ -72,21 +71,23 @@ const Login = () => {
       setIsSubmitting(true);
       await login(signInForm.email, signInForm.password);
       setSuccessMode('signin');
-      
-      toast({
-        title: "Sign in successful",
-        description: "Welcome back to MindBloom!",
-      });
+      toast.success("Welcome back to MindBloom!");
       
       setTimeout(() => {
         navigate('/dashboard');
       }, 1000);
     } catch (error) {
-      toast({
-        title: "Sign in failed",
-        description: error instanceof Error ? error.message : "Invalid email or password",
-        variant: "destructive"
-      });
+      const msg = error instanceof Error ? error.message : "Invalid email or password";
+      // Provide user-friendly messages for common Supabase errors
+      if (msg.includes('Invalid login credentials')) {
+        toast.error("Invalid email or password. Please check your credentials and try again.");
+      } else if (msg.includes('Email not confirmed')) {
+        toast.error("Please verify your email address before signing in. Check your inbox for a verification link.");
+      } else if (msg.includes('User not found')) {
+        toast.error("No account found with this email. Please register first.");
+      } else {
+        toast.error(msg);
+      }
       setIsSubmitting(false);
     }
   };
@@ -96,20 +97,12 @@ const Login = () => {
     e.preventDefault();
     
     if (!passwordStrength.isValid) {
-      toast({
-        title: "Registration failed",
-        description: "Please ensure your password meets all requirements",
-        variant: "destructive"
-      });
+      toast.error("Please ensure your password meets all requirements.");
       return;
     }
     
     if (registerForm.password !== registerForm.confirmPassword) {
-      toast({
-        title: "Registration failed",
-        description: "Passwords do not match",
-        variant: "destructive"
-      });
+      toast.error("Passwords do not match.");
       return;
     }
     
@@ -122,18 +115,11 @@ const Login = () => {
       setSuccessMode('signup');
       setIsSubmitting(false);
 
-      toast({
-        title: "Account created",
-        description: "Please check your email to verify your account, then sign in.",
-      });
+      toast.success("Account created! Please check your email to verify your account, then sign in.");
 
       setActiveTab('signin');
     } catch (error) {
-      toast({
-        title: "Registration failed",
-        description: error instanceof Error ? error.message : "An error occurred during registration",
-        variant: "destructive"
-      });
+      toast.error(error instanceof Error ? error.message : "An error occurred during registration.");
       setIsSubmitting(false);
     }
   };
