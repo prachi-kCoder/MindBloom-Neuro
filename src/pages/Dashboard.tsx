@@ -1,11 +1,15 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { DashboardLayout } from '@/components/roles/DashboardLayout';
 import { TeacherDashboard } from '@/components/roles/teacher/TeacherDashboard';
 import { LearnerDashboard } from '@/components/roles/learner/LearnerDashboard';
+import { LearnerLessons } from '@/components/roles/learner/LearnerLessons';
+import { LearnerVoiceLab } from '@/components/roles/learner/LearnerVoiceLab';
+import { LearnerGames } from '@/components/roles/learner/LearnerGames';
+import { LearnerProgressTracker } from '@/components/roles/learner/LearnerProgressTracker';
 import { ParentDashboard } from '@/components/roles/parent/ParentDashboard';
 import { RoleSelection } from '@/components/auth/RoleSelection';
 import { assignRole, createProfile, type AppRole } from '@/hooks/useUserRole';
@@ -18,30 +22,20 @@ const Dashboard = () => {
   const { isLoading: isRoleLoading, isEducator, isStudent, isParent, hasRole } = useUserRole();
   const [isAssigningRole, setIsAssigningRole] = React.useState(false);
 
-  // Redirect to login if not authenticated
   React.useEffect(() => {
     if (!isAuthLoading && !isAuthenticated) {
       navigate('/login');
     }
   }, [isAuthLoading, isAuthenticated, navigate]);
 
-  // Handle role selection for users without a role
   const handleRoleSelect = async (selectedRole: AppRole) => {
     if (!user?.id) return;
-
     setIsAssigningRole(true);
     try {
-      // Create profile first
       await createProfile(user.id, user.name);
-      
-      // Assign role
       const success = await assignRole(user.id, selectedRole);
-      if (!success) {
-        throw new Error('Failed to assign role');
-      }
-
+      if (!success) throw new Error('Failed to assign role');
       toast.success(`Welcome! You're now set up as a ${selectedRole}.`);
-      // Refresh the page to reload user role
       window.location.reload();
     } catch (error) {
       console.error('Error assigning role:', error);
@@ -51,7 +45,6 @@ const Dashboard = () => {
     }
   };
 
-  // Show loading state
   if (isAuthLoading || isRoleLoading) {
     return (
       <MainLayout>
@@ -64,7 +57,6 @@ const Dashboard = () => {
     );
   }
 
-  // Show role selection if user doesn't have a role
   if (!hasRole) {
     return (
       <MainLayout>
@@ -77,25 +69,35 @@ const Dashboard = () => {
     );
   }
 
-  // Render appropriate dashboard based on role with role-specific sidebar
+  // Learner gets sub-routes
+  if (isStudent) {
+    return (
+      <DashboardLayout>
+        <Routes>
+          <Route index element={<LearnerDashboard />} />
+          <Route path="lessons" element={<LearnerLessons />} />
+          <Route path="voice-lab" element={<LearnerVoiceLab />} />
+          <Route path="games" element={<LearnerGames />} />
+          <Route path="progress" element={<LearnerProgressTracker />} />
+        </Routes>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold mb-2">
             {isEducator && 'Educator Dashboard'}
-            {isStudent && 'My Learning Journey'}
             {isParent && 'Parent Dashboard'}
           </h1>
           <p className="text-muted-foreground">
             {isEducator && 'Create and manage educational content for your students'}
-            {isStudent && 'Explore lessons and track your progress'}
             {isParent && "Monitor your child's learning journey"}
           </p>
         </div>
-
         {isEducator && <TeacherDashboard />}
-        {isStudent && <LearnerDashboard />}
         {isParent && <ParentDashboard />}
       </div>
     </DashboardLayout>

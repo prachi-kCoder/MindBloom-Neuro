@@ -39,7 +39,7 @@ function App() {
       <Route path="/contact" element={<Contact />} />
       <Route path="/login" element={<Login />} />
       <Route path="/profile" element={<Profile />} />
-      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/dashboard/*" element={<Dashboard />} />
       <Route path="/learning" element={<Learning />} />
       <Route path="/learning/:ageGroup/:activityId" element={<LearningActivity />} />
       <Route path="/learning/materials" element={<LearningMaterials />} />
