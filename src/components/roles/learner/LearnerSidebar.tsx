@@ -38,14 +38,14 @@ const learnerMenuItems = [
     icon: Mic,
   },
   {
+    title: 'Learning Games',
+    url: '/dashboard/games',
+    icon: Gamepad2,
+  },
+  {
     title: 'Personal Pace Tracker',
     url: '/dashboard/progress',
     icon: TrendingUp,
-  },
-  {
-    title: 'Learning Games',
-    url: '/learning',
-    icon: Gamepad2,
   },
 ];
 
