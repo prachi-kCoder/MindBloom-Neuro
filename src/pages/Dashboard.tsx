@@ -4,7 +4,6 @@ import { Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { DashboardLayout } from '@/components/roles/DashboardLayout';
-import { TeacherDashboard } from '@/components/roles/teacher/TeacherDashboard';
 import { LearnerDashboard } from '@/components/roles/learner/LearnerDashboard';
 import { LearnerLessons } from '@/components/roles/learner/LearnerLessons';
 import { LearnerVoiceLab } from '@/components/roles/learner/LearnerVoiceLab';
@@ -15,6 +14,16 @@ import { RoleSelection } from '@/components/auth/RoleSelection';
 import { assignRole, createProfile, type AppRole } from '@/hooks/useUserRole';
 import { toast } from 'sonner';
 import MainLayout from '@/components/layout/MainLayout';
+
+// Educator sub-pages
+import { EducatorOverview } from '@/components/roles/teacher/EducatorOverview';
+import { ClassroomManagement } from '@/components/roles/teacher/ClassroomManagement';
+import { TeacherDashboard } from '@/components/roles/teacher/TeacherDashboard';
+import { AILessonPlanner } from '@/components/roles/teacher/AILessonPlanner';
+import { ResourceLibrary } from '@/components/roles/teacher/ResourceLibrary';
+import { EducatorAnalytics } from '@/components/roles/teacher/EducatorAnalytics';
+import { ProfessionalDevelopment } from '@/components/roles/teacher/ProfessionalDevelopment';
+import { AccessibilityToolkit } from '@/components/roles/teacher/AccessibilityToolkit';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -69,7 +78,6 @@ const Dashboard = () => {
     );
   }
 
-  // Learner gets sub-routes
   if (isStudent) {
     return (
       <DashboardLayout>
@@ -84,21 +92,31 @@ const Dashboard = () => {
     );
   }
 
+  if (isEducator) {
+    return (
+      <DashboardLayout>
+        <Routes>
+          <Route index element={<EducatorOverview />} />
+          <Route path="classroom" element={<ClassroomManagement />} />
+          <Route path="content" element={<TeacherDashboard />} />
+          <Route path="lesson-planner" element={<AILessonPlanner />} />
+          <Route path="resources" element={<ResourceLibrary />} />
+          <Route path="analytics" element={<EducatorAnalytics />} />
+          <Route path="development" element={<ProfessionalDevelopment />} />
+          <Route path="accessibility" element={<AccessibilityToolkit />} />
+        </Routes>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold mb-2">
-            {isEducator && 'Educator Dashboard'}
-            {isParent && 'Parent Dashboard'}
-          </h1>
-          <p className="text-muted-foreground">
-            {isEducator && 'Create and manage educational content for your students'}
-            {isParent && "Monitor your child's learning journey"}
-          </p>
+          <h1 className="text-3xl font-bold mb-2">Parent Dashboard</h1>
+          <p className="text-muted-foreground">Monitor your child's learning journey</p>
         </div>
-        {isEducator && <TeacherDashboard />}
-        {isParent && <ParentDashboard />}
+        <ParentDashboard />
       </div>
     </DashboardLayout>
   );

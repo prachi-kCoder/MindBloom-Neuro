@@ -2,11 +2,15 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
   Users, 
-  Upload, 
   BarChart3, 
   LayoutDashboard,
   BookOpen,
-  Settings
+  Settings,
+  Brain,
+  Library,
+  GraduationCap,
+  Accessibility,
+  Upload,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -22,31 +26,14 @@ import {
 } from '@/components/ui/sidebar';
 
 const teacherMenuItems = [
-  {
-    title: 'Dashboard',
-    url: '/dashboard',
-    icon: LayoutDashboard,
-  },
-  {
-    title: 'Classroom Management',
-    url: '/dashboard/classroom',
-    icon: Users,
-  },
-  {
-    title: 'Upload Resources',
-    url: '/dashboard/upload',
-    icon: Upload,
-  },
-  {
-    title: 'Student Progress',
-    url: '/dashboard/progress',
-    icon: BarChart3,
-  },
-  {
-    title: 'Learning Materials',
-    url: '/learning/materials',
-    icon: BookOpen,
-  },
+  { title: 'Overview', url: '/dashboard', icon: LayoutDashboard },
+  { title: 'Classroom', url: '/dashboard/classroom', icon: Users },
+  { title: 'Content Manager', url: '/dashboard/content', icon: Upload },
+  { title: 'AI Lesson Planner', url: '/dashboard/lesson-planner', icon: Brain },
+  { title: 'Resource Library', url: '/dashboard/resources', icon: Library },
+  { title: 'Analytics', url: '/dashboard/analytics', icon: BarChart3 },
+  { title: 'Professional Dev', url: '/dashboard/development', icon: GraduationCap },
+  { title: 'Accessibility', url: '/dashboard/accessibility', icon: Accessibility },
 ];
 
 export function TeacherSidebar() {
@@ -77,9 +64,7 @@ export function TeacherSidebar() {
                       end={item.url === '/dashboard'}
                       className={({ isActive }) => 
                         `flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
-                          isActive 
-                            ? 'bg-primary text-primary-foreground' 
-                            : 'hover:bg-muted'
+                          isActive ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
                         }`
                       }
                     >
